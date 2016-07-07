@@ -191,9 +191,9 @@ void MainWindow::on_btnTrack_clicked()
     RECT inputRECT;
 
     inputRECT.left		= m_Config._config.frmWidth / 2 - frmView->m_rectWidthInit / 2;
-    inputRECT.top		= m_Config._config.frmWidth / 2 - frmView->m_rectHeightInit / 2;
+    inputRECT.top		= m_Config._config.frmHeight / 2 - frmView->m_rectHeightInit / 2;
     inputRECT.right		= m_Config._config.frmWidth / 2 + frmView->m_rectWidthInit / 2;
-    inputRECT.bottom	= m_Config._config.frmWidth / 2 + frmView->m_rectHeightInit / 2;
+    inputRECT.bottom	= m_Config._config.frmHeight / 2 + frmView->m_rectHeightInit / 2;
 
     frmView->StartTracking(inputRECT);
 }

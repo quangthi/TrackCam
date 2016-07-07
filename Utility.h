@@ -12,6 +12,17 @@
 #include "opencv2/core/core.hpp"
 #include <DIRECT.H>
 
+#define FRM_WIDTH       376
+#define FRM_HEIGHT      290
+#define FRM_POS_X       645
+#define FRM_POS_Y       420
+#define CAM_URL         "rtsp://127.0.0.1:8554/cam1_stream1"
+#define TRK_WIDTH       90
+#define TRK_HEIGHT      60
+#define FPS             24
+#define LOCAL_UDP_PORT  8000
+#define REMOTE_UDP_PORT 8001
+
 //general auxillary fuction
 double  fn_Round(double input);
 double	fn_kthSmallest(double a[], int n, int k);

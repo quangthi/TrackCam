@@ -7,8 +7,8 @@ CTracker::CTracker()
     m_pImgCurrentHalf=NULL;
     gImgInitMaskHalf=NULL;
     gImgInitMask=NULL;
-    m_ImageWidth=720;
-    m_ImageHeight=480;
+    m_ImageWidth=FRM_WIDTH;
+    m_ImageHeight=FRM_HEIGHT;
 
     m_TrkResult.FGImage = NULL;
     m_TrkResult.FGMask = NULL;
