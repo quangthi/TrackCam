@@ -351,8 +351,9 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
     if (!m_IsTracking && !m_IsMouseOn)
     {
         //QRect rect1(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_rectWidthInit, m_rectHeightInit);
-        p.setPen(QPen(Qt::red));
+        p.setPen(QPen(Qt::red, 2));
         p.setBrush(QBrush(Qt::transparent));
+
 
         p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2 + 10, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2);
         p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2 + 10);
