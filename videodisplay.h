@@ -7,6 +7,7 @@
 #include <QImage>
 #include "Tracker.h"
 #include "Config.h"
+#include "videowork.h"
 
 
 namespace Ui {
@@ -20,23 +21,29 @@ public:
     int             m_rectWidthInit;
     int             m_rectHeightInit;
     bool            m_IsMouseOn;
-    bool            m_IsTracking;
 
     CConfig         m_Config;
     CvVideoWriter*	m_Writer;
     RECT            m_rectCurrent;
+    //std::string     m_strVideoFile;
+    short int       m_centerX;
+    short int       m_centerY;
+
+    QThread         *m_thread;
+    VideoWork       *m_worker;
+    std::string     m_strVideoFile;
 
 
 public:
     explicit VideoDisplay(QWidget *parent = 0);
-    ~VideoDisplay();
-
-    void StartTracking(RECT inputRECT);
-    void StopTracking();
+    ~VideoDisplay();    
+    void InitTimer();
+    void resetPaint();
 
 private:
     Ui::VideoDisplay *ui;
-    void InitTimer();
+
+
 
 
 protected:
@@ -45,10 +52,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void closeEvent(QCloseEvent *event);
-private slots:
-    void ShowVideoCam();
+private slots:    
+    void OnTimerDrawImage();
 
-    void OnTimerDraw();
 };
 
 #endif // VIDEODISPLAY_H

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>390</width>
-    <height>297</height>
+    <width>429</width>
+    <height>316</height>
    </rect>
   </property>
   <property name="palette">
@@ -37,9 +37,9 @@
      <colorrole role="Light">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>36</red>
-        <green>72</green>
-        <blue>96</blue>
+        <red>31</red>
+        <green>53</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -138,9 +138,9 @@
      <colorrole role="Light">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>36</red>
-        <green>72</green>
-        <blue>96</blue>
+        <red>31</red>
+        <green>53</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -239,9 +239,9 @@
      <colorrole role="Light">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>36</red>
-        <green>72</green>
-        <blue>96</blue>
+        <red>31</red>
+        <green>53</green>
+        <blue>72</blue>
        </color>
       </brush>
      </colorrole>
@@ -328,48 +328,24 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>181</width>
-      <height>121</height>
+      <y>10</y>
+      <width>200</width>
+      <height>120</height>
      </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>8</pointsize>
      </font>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="title">
-     <string notr="true" comment="asd ">Video Stream:</string>
+     <string notr="true" comment="asd ">Video:</string>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QCustomButton" name="Start">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-     </item>
-     <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="1" column="0">
       <widget class="QCustomButton" name="Stop">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -387,7 +363,43 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item row="0" column="0">
+      <widget class="QCustomButton" name="Start">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QCustomButton" name="OpenFile">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Open</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
       <widget class="QCustomButton" name="ShowHide">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -410,9 +422,9 @@
    <widget class="QCustomGroupBox" name="groupBox_5">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>160</y>
-      <width>181</width>
+      <x>220</x>
+      <y>10</y>
+      <width>200</width>
       <height>121</height>
      </rect>
     </property>
@@ -422,59 +434,77 @@
     <property name="title">
      <string notr="true" comment="asd ">Record:</string>
     </property>
-    <layout class="QFormLayout" name="formLayout">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="1">
+      <widget class="QCustomEdit" name="FpsEdit"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCustomComboBox" name="cbSavePeriod">
+       <item>
+        <property name="text">
+         <string>15 mins</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>30 mins</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>45 mins</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>60 mins</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Interval:</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_7">
        <property name="font">
         <font>
-         <pointsize>11</pointsize>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>FPS</string>
+        <string>Frame rate:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="FpsEdit"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="font">
-        <font>
-         <pointsize>11</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Time</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QCustomComboBox" name="cbSavePeriod">
-       <item>
-        <property name="text">
-         <string>15 min</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>30 min</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>45 min</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>60 min</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="4" column="1">
+    </layout>
+   </widget>
+   <widget class="QCustomGroupBox" name="groupBox_8">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>139</y>
+      <width>200</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string notr="true" comment="asd ">Control:</string>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="5" column="0" colspan="2">
       <widget class="QCustomButton" name="btnExit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -492,37 +522,80 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QCheckBox" name="chkRec">
+     <item row="1" column="0">
+      <widget class="QCustomRadio" name="radioMouse">
        <property name="text">
-        <string>Rec</string>
+        <string>Use mouse</string>
        </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCustomCheckBox" name="chkRec">
+       <property name="text">
+        <string>Save video to disk</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QCustomRadio" name="radioJoystick">
+       <property name="text">
+        <string>Use joystick</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup</string>
+       </attribute>
       </widget>
      </item>
     </layout>
    </widget>
-   <widget class="QCustomGroupBox" name="groupBox_8">
+   <widget class="QCustomGroupBox" name="groupBox_6">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>160</y>
-      <width>181</width>
-      <height>121</height>
+      <y>140</y>
+      <width>200</width>
+      <height>161</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="title">
-     <string notr="true" comment="asd ">Tracking Rect:</string>
+     <string notr="true" comment="asd ">Tracking:</string>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="3" column="3">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="4" column="1">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Width:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QCustomEdit" name="EditWidth">
+       <property name="inputMethodHints">
+        <set>Qt::ImhNone</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QCustomEdit" name="EditHeight">
+       <property name="inputMethodHints">
+        <set>Qt::ImhNone</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Height:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
       <widget class="QCustomButton" name="cbtnDecrease">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -540,8 +613,11 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="1" column="1">
       <widget class="QCustomButton" name="cbtnIncrease">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -558,73 +634,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="EditWidth">
-       <property name="inputMethodHints">
-        <set>Qt::ImhNone</set>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="EditHeight">
-       <property name="inputMethodHints">
-        <set>Qt::ImhNone</set>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Height</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Width</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QCustomGroupBox" name="groupBox_6">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>20</y>
-      <width>180</width>
-      <height>120</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string notr="true" comment="asd ">Control</string>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_8">
-     <item row="1" column="0">
-      <widget class="QRadioButton" name="radioJoystick">
-       <property name="text">
-        <string>Joystick</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QRadioButton" name="radioMouse">
-       <property name="text">
-        <string>Mouse</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string notr="true">buttonGroup</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="1" column="1">
+     <item row="1" column="2">
       <widget class="QCustomButton" name="btnTrack">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -642,7 +652,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="3" column="2">
       <widget class="QCustomButton" name="btnRelease">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -662,6 +672,12 @@
      </item>
     </layout>
    </widget>
+   <zorder>groupBox</zorder>
+   <zorder>groupBox_5</zorder>
+   <zorder>groupBox_8</zorder>
+   <zorder>groupBox_6</zorder>
+   <zorder>cbtnIncrease</zorder>
+   <zorder>cbtnIncrease</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -681,6 +697,21 @@
    <class>QCustomComboBox</class>
    <extends>QComboBox</extends>
    <header>qcustomcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCustomEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">qcustomedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCustomRadio</class>
+   <extends>QRadioButton</extends>
+   <header location="global">qcustomradio.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCustomCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header location="global">qcustomcheckbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

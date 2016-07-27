@@ -13,13 +13,13 @@
 #include <DIRECT.H>
 
 #define FRM_WIDTH       376
-#define FRM_HEIGHT      290
-#define FRM_POS_X       645
+#define FRM_HEIGHT      321
+#define FRM_POS_X       639
 #define FRM_POS_Y       420
 #define CAM_URL         "rtsp://127.0.0.1:8554/cam1_stream1"
 #define TRK_WIDTH       90
 #define TRK_HEIGHT      60
-#define FPS             24
+#define FPS             18.5
 #define LOCAL_UDP_PORT  8000
 #define REMOTE_UDP_PORT 8001
 
@@ -30,6 +30,7 @@ double	fn_median(double a[], int n);
 double	fn_Abs(double input);
 char*	fn_DoubleToStr(double input, int precision);
 void	fn_DoubleToStr2(double input, int precision, char* strOutput);
+int     fn_ConvStrChar(std::string szStr, char *szBuff);
 
 //RECT operation
 //scale a rect by a zoom factor

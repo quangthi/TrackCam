@@ -25,7 +25,11 @@ SOURCES += main.cpp\
     qcustomframe.cpp \
     qcustomgroupbox.cpp \
     qcustomtabwidget.cpp \
-    Config.cpp
+    Config.cpp \
+    qcustomedit.cpp \
+    qcustomradio.cpp \
+    qcustomcheckbox.cpp \
+    videowork.cpp
 
 HEADERS  += mainwindow.h \
     Utility.h \
@@ -36,7 +40,11 @@ HEADERS  += mainwindow.h \
     qcustomframe.h \
     qcustomgroupbox.h \
     qcustomtabwidget.h \
-    Config.h
+    Config.h \
+    qcustomedit.h \
+    qcustomradio.h \
+    qcustomcheckbox.h \
+    videowork.h
 
 FORMS    += mainwindow.ui \
     videodisplay.ui

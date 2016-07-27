@@ -26,13 +26,26 @@ void QCustomComboBox::hoverMove(QHoverEvent *)
 }
 void QCustomComboBox::highLight()
 {
-    this->setStyleSheet("background-color: rgb(16, 32, 64);color:rgb(255, 255, 255);font: bold 12pt \"MS Shell Dlg 2\";");
+    this->setStyleSheet("background-color: rgb(41, 84, 118);"
+                        "color:rgb(255, 255, 255);"
+                        "font: bold 12pt \"MS Shell Dlg 2\";"
+                        "border-radius: 5px;"
+                        "border-color: beige;"
+                        "border-style: outset;"
+                         "border-width: 1px;");
+    //this->setStyleSheet("background-color: rgb(27, 168, 184);color:rgb(255, 255, 255);font: bold 12pt \"MS Shell Dlg 2\";");
     repaint();
 }
 void QCustomComboBox::resetView()
 {
-    //this->setStyleSheet("background-color: rgb(16, 32, 64);color:rgb(255, 255, 255);");
-    this->setStyleSheet("background-color: rgb(16, 32, 64);color:rgb(255, 255, 255);font: 12pt \"MS Shell Dlg 2\";");
+    this->setStyleSheet("background-color: rgb(41, 84, 118);"
+                        "color:rgb(255, 255, 255);"
+                        "border:none;"
+                        "border-radius: 5px;"
+                        "font:  12pt \"MS Shell Dlg 2\";"
+                        );
+    //this->setStyleSheet("background-color: rgb(41, 84, 118);color:rgb(255, 255, 255);");
+    //this->setStyleSheet("background-color: rgb(41, 84, 118);color:rgb(255, 255, 255);font: 12pt \"MS Shell Dlg 2\";");
     repaint();
 
 }

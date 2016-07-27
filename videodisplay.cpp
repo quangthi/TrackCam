@@ -3,19 +3,25 @@
 
 RECT trackingRect;
 
-QImage                      *qImg = NULL;
-QTimer                      *frameTimer, *drawTimer;
-CvCapture                   *gCapture = NULL;
-IplImage                    *gTrueFrame = NULL;
-IplImage                    *gFrame = NULL;
-IplImage                    *gFrameHalf = NULL;
-CTracker                    gTracker;
+QImage                      *_qImg = NULL;
+QTimer                      *_drawTimer;
+IplImage                    *_bufferFrame = NULL;
+
+QRect                       _toBeTracked;
+bool                        _isSelecting = false;
+
+int                         _nCaptureTimeOut = 0;
 
 
-QRect toBeTracked;
-bool isSelecting = false;
+// for putting text to frame
+CvFont      cvTxtFont;
+double      hScale = 0.5;
+double      vScale = 0.5;
+double      lineWidth = 1.5;
+std::string szTime, szDay;
+char        szTmp[255];
 
-static short                mousePointerX,mousePointerY;
+
 
 VideoDisplay::VideoDisplay(QWidget *parent) :
     QMainWindow(parent),
@@ -26,77 +32,43 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
     this->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
     this->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
 
-    m_IsTracking = false;
     m_Writer = NULL;
+
 
     m_rectCurrent.left = 0;
     m_rectCurrent.top = 0;
     m_rectCurrent.right = 0;
     m_rectCurrent.bottom = 0;
+    m_centerX   = 0;
+    m_centerY   = 0;
 
+    _drawTimer = new QTimer();
+    connect(_drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDrawImage()));
 
-    InitTimer();    
+    // The thread and the worker are created in the constructor so it is always safe to delete them.
+    m_thread = new QThread();
+    m_worker = new VideoWork();
+
+    m_worker->moveToThread(m_thread);
+    connect(m_worker, SIGNAL(workRequested()), m_thread, SLOT(start()));
+    connect(m_thread, SIGNAL(started()), m_worker, SLOT(doWork()));
+    connect(m_worker, SIGNAL(finished()), m_thread, SLOT(quit()), Qt::DirectConnection);
 }
 
 VideoDisplay::~VideoDisplay()
-{    
-    m_IsTracking = false;
-    frameTimer->stop();
-    drawTimer->stop();
-    cvReleaseCapture(&gCapture);    
+{
+    cvReleaseImage(&_bufferFrame);
+    _bufferFrame = NULL;
+
+    m_worker->abort();
+    m_thread->wait();
+
+    _drawTimer->stop();
+
+    delete m_thread;
+    delete m_worker;
 
     delete ui;
-}
-
-int inline ConvStrChar(std::string szStr, char *szBuff)
-{
-    int	nLen = szStr.length();
-
-    nLen = (nLen < 254)? nLen : 254;		// Get min(nLeng,nSize)	- 254 = max buff
-    for (int i = 0; i < nLen; i ++)
-        szBuff[i] = (char)szStr[i];
-
-    szBuff[nLen] = 0x00;
-    return nLen;
-}
-
-
-bool inline DrawTrackingRgn(IplImage* img, RECT rect)
-{
-//    if (!m_IsTracking)
-//        return;
-
-
-    CvRect cvRectBox = cvRect(0, 0, 0, 0);
-
-    utl_ConvertRectToBox(rect, &cvRectBox);
-
-    if ((cvRectBox.width <= 10) ||(cvRectBox.height <= 10))
-    {
-//        m_IsTracking = false;
-        return false;
-    }
-
-    CvPoint ltPoint = cvPoint(cvRectBox.x, cvRectBox.y);                                        // left top point of region
-    CvPoint bdPoint = cvPoint(cvRectBox.x + cvRectBox.width, cvRectBox.y + cvRectBox.height);	// bottom down point of region
-    CvPoint rtPoint = cvPoint(cvRectBox.x + cvRectBox.width, cvRectBox.y);                      // right top point of region
-    CvPoint lbPoint = cvPoint(cvRectBox.x, cvRectBox.y + cvRectBox.height);                     // left bottom point of region
-
-    CvScalar trackScalar = cvScalar(0, 255, 0);
-
-    cvLine(img, ltPoint, cvPoint(ltPoint.x + 10, ltPoint.y), trackScalar, 1);
-    cvLine(img, ltPoint, cvPoint(ltPoint.x, ltPoint.y + 10), trackScalar, 1);
-
-    cvLine(img, bdPoint, cvPoint(bdPoint.x - 10, bdPoint.y), trackScalar, 1);
-    cvLine(img, bdPoint, cvPoint(bdPoint.x, bdPoint.y - 10), trackScalar, 1);
-
-    cvLine(img, rtPoint, cvPoint(rtPoint.x - 10, rtPoint.y), trackScalar, 1);
-    cvLine(img, rtPoint, cvPoint(rtPoint.x, rtPoint.y + 10), trackScalar, 1);
-
-    cvLine(img, lbPoint, cvPoint(lbPoint.x, lbPoint.y - 10), trackScalar, 1);
-    cvLine(img, lbPoint, cvPoint(lbPoint.x + 10, lbPoint.y), trackScalar, 1);
-
-    return true;
 }
 
 QString GetTimeString()
@@ -110,8 +82,10 @@ QString GetDateString()
 }
 
 uchar *qImageBuffer = NULL;
-QImage *IplImageToQImage(const IplImage * iplImage, uchar **data, double mini, double maxi)
+QImage *IplImageToQImage(const IplImage * iplImage, double mini, double maxi)
 {
+    if (!iplImage)
+        return NULL;
 
     int width = iplImage->width;
     int widthStep = iplImage->widthStep;
@@ -320,57 +294,152 @@ QImage *IplImageToQImage(const IplImage * iplImage, uchar **data, double mini, d
 
 void VideoDisplay::InitTimer()
 {
-    // Init Video Timer
-    frameTimer  = new QTimer();
-    connect(frameTimer, SIGNAL(timeout()), this, SLOT(ShowVideoCam()));
-    frameTimer->start(20);
-
-    drawTimer = new QTimer();
-    connect(drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDraw()));
-    drawTimer->start(40);
+    _drawTimer->start(40);
 }
+
+void VideoDisplay::resetPaint()
+{
+    repaint();
+}
+
 
 
 void VideoDisplay::paintEvent(QPaintEvent *event)
 {
+
     QPainter p(this);
 
+    if (!m_worker->m_pFrame)
+    {
+        QFont font;
+        font.setPointSize(30);
+        p.setFont(font);
+        p.setPen(QPen(Qt::red, 4));
+        p.drawText(m_Config._config.frmWidth/2 - 80,
+                   m_Config._config.frmHeight /2 +5, "NO VIDEO");
+        return;
+    }
+
+
+    //qDebug()<<"Test";
     if(qImageBuffer)
         delete qImageBuffer;
 
-    if (gFrame)
-        qImg = IplImageToQImage(gFrame,NULL,0,255);
 
-    if (qImg)
+    if (_bufferFrame)
+        _qImg = IplImageToQImage(_bufferFrame,0,255);
+
+    if (_qImg)
     {
         QRect rect(0, 0, m_Config._config.frmWidth, m_Config._config.frmHeight);
         p.drawRect(rect);
-        p.drawImage(rect,*qImg,qImg->rect());
+        p.drawImage(rect,*_qImg,_qImg->rect());
+
+        QFont font;
+        font.setPointSize(11);
+        p.setFont(font);
+
+        if (m_worker->m_IsTracking)
+            p.setPen(QPen(Qt::green, 2));
+        else
+            p.setPen(QPen(Qt::red, 2));
+
+        QString tmpStr ="";
+        tmpStr += QString::number(m_centerX);
+        tmpStr += " x ";
+        tmpStr += QString::number(m_centerY);
+        p.drawText(m_Config._config.frmWidth - 65, m_Config._config.frmHeight - 12,tmpStr);
+
+        if (m_Writer)
+        {
+            p.setPen(QPen(Qt::red, 2));
+            p.drawText(m_Config._config.frmWidth - 85,
+                       18, "Recording...");
+        }
     }
 
-    if (!m_IsTracking && !m_IsMouseOn)
+
+    if (!m_worker->m_IsTracking && !m_IsMouseOn)
     {
         //QRect rect1(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_rectWidthInit, m_rectHeightInit);
         p.setPen(QPen(Qt::red, 2));
-        p.setBrush(QBrush(Qt::transparent));
+        //p.setBrush(QBrush(Qt::transparent));
 
-
-        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2 + 10, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2);
-        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2 + 10);
-        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 + m_rectWidthInit / 2 - 10, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2);
-        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2 + 10);
-        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2 + 10, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2);
-        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2, m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2 - 10);
-        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2, m_Config._config.frmWidth / 2 + m_rectWidthInit / 2 - 10, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2);
-        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2, m_Config._config.frmWidth / 2 + m_rectWidthInit / 2, m_Config._config.frmHeight / 2 + m_rectHeightInit / 2 - 10);
+        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 - m_rectWidthInit / 2 + 10,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2);
+        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2 + 10);
+        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 + m_rectWidthInit / 2 - 10,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2);
+        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 - m_rectHeightInit / 2 + 10);
+        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 - m_rectWidthInit / 2 + 10,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2);
+        p.drawLine(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 - m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2 - 10);
+        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 + m_rectWidthInit / 2 - 10,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2);
+        p.drawLine(m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2,
+                   m_Config._config.frmWidth / 2 + m_rectWidthInit / 2,
+                   m_Config._config.frmHeight / 2 + m_rectHeightInit / 2 - 10);
 
     }
-    else if (isSelecting)
+
+    else if (_isSelecting)
     {
-        p.setPen(QPen(Qt::red));
+        p.setPen(QPen(Qt::red, 2));
         p.setBrush(QBrush(Qt::transparent));
-        p.drawRect(toBeTracked);
+        p.drawRect(_toBeTracked);
+
     }
+
+    else if (m_worker->m_IsTracking)
+    {
+        m_rectCurrent = m_worker->m_rectCurrent;
+        p.setPen(QPen(Qt::green, 1));
+
+        QPoint lefttop[3] = {
+            QPoint(m_rectCurrent.left, m_rectCurrent.top + 10),
+            QPoint(m_rectCurrent.left, m_rectCurrent.top),
+            QPoint(m_rectCurrent.left + 10, m_rectCurrent.top),
+        };
+        QPoint righttop[3] = {
+            QPoint(m_rectCurrent.right, m_rectCurrent.top + 10),
+            QPoint(m_rectCurrent.right, m_rectCurrent.top),
+            QPoint(m_rectCurrent.right - 10, m_rectCurrent.top),
+        };
+        QPoint rightbottom[3] = {
+            QPoint(m_rectCurrent.right, m_rectCurrent.bottom - 10),
+            QPoint(m_rectCurrent.right, m_rectCurrent.bottom),
+            QPoint(m_rectCurrent.right - 10, m_rectCurrent.bottom),
+        };
+        QPoint leftbottom[3] = {
+            QPoint(m_rectCurrent.left, m_rectCurrent.bottom - 10),
+            QPoint(m_rectCurrent.left, m_rectCurrent.bottom),
+            QPoint(m_rectCurrent.left + 10, m_rectCurrent.bottom),
+        };
+        p.drawPolyline(lefttop, 3);
+        p.drawPolyline(righttop, 3);
+        p.drawPolyline(rightbottom, 3);
+        p.drawPolyline(leftbottom, 3);
+    }
+
+
 }
 
 
@@ -379,21 +448,24 @@ void VideoDisplay::mousePressEvent(QMouseEvent *event)
     if (!m_IsMouseOn)
         return;
 
+    if (!m_worker->m_pFrame)
+        return;
+
     if(event->buttons() & Qt::LeftButton)
     {
         QRect videoRect(0, 0, m_Config._config.frmWidth, m_Config._config.frmHeight);
 
         if(videoRect.contains(event->x(),event->y()))
         {
-            m_IsTracking = false;
-            isSelecting = true;
+            m_worker->m_IsTracking = false;
+            _isSelecting = true;
             trackingRect.left = event->x() - videoRect.left();
             trackingRect.top = event->y() - videoRect.top();
 
-            toBeTracked.setLeft(event->x());
-            toBeTracked.setTop(event->y());
-            toBeTracked.setRight(event->x()) ;
-            toBeTracked.setBottom( event->y());
+            _toBeTracked.setLeft(event->x());
+            _toBeTracked.setTop(event->y());
+            _toBeTracked.setRight(event->x()) ;
+            _toBeTracked.setBottom( event->y());
         }
     }
     QMainWindow::mousePressEvent(event);
@@ -404,12 +476,15 @@ void VideoDisplay::mouseMoveEvent(QMouseEvent *event)
     if (!m_IsMouseOn)
         return;
 
-    if(isSelecting)
+    if (!m_worker->m_pFrame)
+        return;
+
+    if(_isSelecting)
     {
-        toBeTracked.setRight(event->x()) ;
-        toBeTracked.setBottom(event->y());
-        if(!toBeTracked.contains(event->x(),event->y()))
-            isSelecting = false;
+        _toBeTracked.setRight(event->x()) ;
+        _toBeTracked.setBottom(event->y());
+        if(!_toBeTracked.contains(event->x(),event->y()))
+            _isSelecting = false;
     }
 }
 
@@ -418,7 +493,10 @@ void VideoDisplay::mouseReleaseEvent(QMouseEvent *event)
     if (!m_IsMouseOn)
         return;
 
-    if(isSelecting)
+    if (!m_worker->m_pFrame)
+        return;
+
+    if(_isSelecting)
     {
         QRect videoRect(0, 0, m_Config._config.frmWidth, m_Config._config.frmHeight);
         trackingRect.right = event->x() - videoRect.left();
@@ -445,121 +523,79 @@ void VideoDisplay::mouseReleaseEvent(QMouseEvent *event)
         if(trackingRect.bottom > m_Config._config.frmHeight - 1)
             trackingRect.bottom = m_Config._config.frmHeight - 1;
 
-        StartTracking(trackingRect);
-        isSelecting = false;
+        m_worker->StartTracking(trackingRect);
+        _isSelecting = false;
     }
 
     QMainWindow::mouseReleaseEvent(event);
 }
 
-void VideoDisplay::ShowVideoCam()
+void VideoDisplay::OnTimerDrawImage()
 {
-    if (gCapture ==  NULL)
+    if (m_worker->m_IsCapturing)
+        _nCaptureTimeOut++;
+    else
+        _nCaptureTimeOut = 0;
+    if (_nCaptureTimeOut >= 250) // timeout 10 seconds
     {
-        if (m_Config._config.ipCam == 1)
+        _nCaptureTimeOut = 0;
+
+        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
+                                                                    tr("Video not found!\n Exit Application?\n"),
+                                                                    QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
         {
-            char		szTmp[255];
-            ConvStrChar(m_Config._config.strCamUrl, szTmp);
-            gCapture = cvCaptureFromFile(szTmp);
+            QApplication::quit();
         }
-        else if (m_Config._config.ipCam == 0)
-            gCapture = cvCaptureFromCAM(0);
-
     }
 
-    if (!gCapture)
+
+    if (!m_worker->m_pFrame)
+        return;
+
+    if (!_bufferFrame)
+        _bufferFrame = cvCreateImage(cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight), 8, 3);
+
+    cvCopy(m_worker->m_pFrame, _bufferFrame);
+
+    if (m_worker->m_IsTracking)
     {
-        frameTimer->stop();
-        drawTimer->stop();
-        close();
-        return;
+        CvRect	nCvRectBox = cvRect(0, 0, 0, 0);
+        utl_ConvertRectToBox(m_worker->m_rectCurrent, &nCvRectBox);
+        m_centerX = ((nCvRectBox.x + nCvRectBox.width / 2)
+                    - (m_Config._config.frmWidth / 2)) * 100 / m_Config._config.frmWidth;
+        m_centerY = ((nCvRectBox.y + nCvRectBox.height / 2)
+                    - (m_Config._config.frmHeight / 2)) * 100 / m_Config._config.frmHeight;
     }
-
-    if (gFrame == NULL)
-        gFrame = cvCreateImage(cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight), 8, 3);
-
-    gTrueFrame = cvQueryFrame(gCapture);
-
-    if(!gTrueFrame)
-        return;
-
-    cvResize(gTrueFrame, gFrame);
-
-    if (m_IsTracking) // if tracking opt is ON
+    else
     {
-        cvResize(gFrame, gFrameHalf, CV_INTER_LINEAR); // g_FrameHalf is initial when StartTracking function is called
-        gTracker.TrackNextFrame(gFrameHalf, gTracker.gRectCurrentHalf, &gTracker.m_TrkResult);
-        gTracker.gRectCurrentHalf = gTracker.m_TrkResult.targetBox;
-        utl_RectCheckBound(&gTracker.gRectCurrentHalf, gTracker.m_ImageMaxX/2, gTracker.m_ImageMaxY/2);
-
-        //update full size RECT for display
-        gTracker.m_RectCurrent.left	= gTracker.gRectCurrentHalf.left*2;
-        gTracker.m_RectCurrent.top	= gTracker.gRectCurrentHalf.top*2;
-        gTracker.m_RectCurrent.right	= gTracker.gRectCurrentHalf.right*2;
-        gTracker.m_RectCurrent.bottom	= gTracker.gRectCurrentHalf.bottom*2;
-        if (!DrawTrackingRgn(gFrame, gTracker.m_RectCurrent))
-        {
-            StopTracking();
-            return;
-        }
-
-        m_rectCurrent = gTracker.m_RectCurrent;
+        m_centerX = 0;
+        m_centerY = 0;
     }
 
-    // save video to hard disk
-//    if (m_Writer != NULL)
-//        cvWriteToAVI(m_Writer, gFrame);
 
 
-//    if(qImageBuffer)
-//        delete qImageBuffer;
-//    qImg = IplImageToQImage(gFrame,NULL,0,255);
-//    repaint();
+    cvInitFont(&cvTxtFont, CV_FONT_HERSHEY_SIMPLEX | CV_FONT_ITALIC, hScale, vScale, 0, lineWidth);
 
-}
-
-
-
-void VideoDisplay::StartTracking(RECT inputRECT)
-{
-    if (!gFrame)
-        return;
-
-    gTracker.InitForFirstFrame1(gFrame, inputRECT);
-    gFrameHalf = cvCreateImage(cvSize(gTracker.m_ImageMaxX/2, gTracker.m_ImageMaxY/2), 8, 3);
-    m_IsTracking = true;
-
-}
-
-void VideoDisplay::StopTracking()
-{
-    m_IsTracking = false;
-    cvReleaseImage(&gFrameHalf);
-}
-
-CvFont      cvTxtFont;
-double      hScale = 0.5;
-double      vScale = 0.5;
-int         lineWidth = 1;
-std::string szTime, szDay;
-char        szTmp[255];
-
-
-void VideoDisplay::OnTimerDraw()
-{
-    repaint();
-    if (m_Writer != NULL)
+    if (m_strVideoFile == "")
     {
         szTime  = GetTimeString().toStdString();
+        fn_ConvStrChar(szTime, szTmp);
+        cvPutText(_bufferFrame, szTmp, cvPoint(3, 15), &cvTxtFont, cvScalar(255, 255, 255));
+    }
+
+    repaint();
+
+
+    if (m_Writer != NULL)
+    {
         szDay   = GetDateString().toStdString();
-        cvInitFont(&cvTxtFont, CV_FONT_HERSHEY_SIMPLEX | CV_FONT_ITALIC, hScale, vScale, 0, lineWidth);
-        ConvStrChar(szTime, szTmp);
-        cvPutText(gFrame, szTmp, cvPoint(3, 15), &cvTxtFont, cvScalar(255, 0, 0));
+        fn_ConvStrChar(szDay, szTmp);
+        cvPutText(_bufferFrame, szTmp, cvPoint(m_Config._config.frmWidth - 100, 15),
+                  &cvTxtFont, cvScalar(255, 255, 255));        
 
-        ConvStrChar(szDay, szTmp);
-        cvPutText(gFrame, szTmp, cvPoint(m_Config._config.frmWidth - 110, 15), &cvTxtFont, cvScalar(255, 0, 0));
-
-        cvWriteToAVI(m_Writer, gFrame);
+        cvWriteToAVI(m_Writer, _bufferFrame);
     }
 
 }

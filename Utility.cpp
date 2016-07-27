@@ -162,6 +162,19 @@ void fn_DoubleToStr2(double input, int precision, char* strOutput)
 //	return(strTemp);
 }
 
+int fn_ConvStrChar(std::string szStr, char *szBuff)
+{
+    int	nLen = szStr.length();
+
+    nLen = (nLen < 254)? nLen : 254;		// Get min(nLeng,nSize)	- 254 = max buff
+    for (int i = 0; i < nLen; i ++)
+        szBuff[i] = (char)szStr[i];
+
+    szBuff[nLen] = 0x00;
+    return nLen;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 void utl_RectZoom(RECT *ioRect, float inZoomFactor, int imgWidth, int imgHeight)
 	//scale a rect by a zoom factor
@@ -394,3 +407,4 @@ void utl_ConvertBoxToRect(RECT *RectInput, CvRect CvRectInput)
 	RectInput->left = CvRectInput.x;
 	RectInput->right = (CvRectInput.x + CvRectInput.width);
 }
+

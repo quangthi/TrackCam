@@ -9,6 +9,8 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 #include <QSystemTrayIcon>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "videodisplay.h"
 
@@ -41,6 +43,7 @@ private:
     bool    CreateRecordTimerPeriod();
     QString GetStrTime();
     void    SendMsgTrkPos(short int, short int);
+    void    OpenFileDlg();
 
     void    InitNetwork();
 
@@ -71,6 +74,7 @@ private slots:
     void on_cbtnDecrease_clicked();
     void OnSavingVideo();
     void on_chkRec_clicked(bool checked);
+    void on_OpenFile_clicked();
 
     void ProcMsgControl();
 
@@ -79,6 +83,8 @@ private slots:
     void showHideWindow();
     void on_btnExit_clicked();
     void OnTimerSend();
+
+
 };
 
 #endif // MAINWINDOW_H

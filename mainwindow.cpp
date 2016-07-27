@@ -3,34 +3,38 @@
 
 
 
-bool    gIsVideoShown = false;
-QTimer  *gSaveTimer, *gSendTimer;
-CvSize  gVideoSize;
+bool        gIsVideoShown = false;
+QTimer      *gSaveTimer, *gSendTimer;
+CvSize      gVideoSize;
+std::string gStrVideoFile = "";
 // Position for sending
-short int	gCenterX = 0;
-short int	gCenterY = 0;
+//short int	gCenterX = 0;
+//short int	gCenterY = 0;
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
+
 
     this->setFixedSize(this->width(),this->height());
     this->ui->radioMouse->setChecked(false);
     this->ui->radioJoystick->setChecked(true);    
     this->ui->EditWidth->setValidator( new QIntValidator(30, m_Config._config.frmWidth*0.8f, this));
     this->ui->EditHeight->setValidator( new QIntValidator(30, m_Config._config.frmHeight*0.8f, this));
-    this->ui->FpsEdit->setValidator( new QIntValidator(18, 30, this));
+    this->ui->FpsEdit->setValidator( new QDoubleValidator(15.0, 30.0, 1, this));
 
     InitNetwork();
 
+    // create tray item
     createTrayActions();
     createTrayIcon();
     setTrayIcon();
-    trayIcon->show();
-
-    frmView = NULL;
+    trayIcon->show();    
 
     this->ui->EditWidth->setText(QString::number(m_Config._config.trkWidth));
     this->ui->EditHeight->setText(QString::number(m_Config._config.trkHeight));
@@ -44,6 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(gSendTimer, SIGNAL(timeout()), this, SLOT(OnTimerSend()));
 
     gVideoSize = cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+
+    frmView = new VideoDisplay();
+    frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    frmView->show();
+    gIsVideoShown = true;
 }
 
 MainWindow::~MainWindow()
@@ -69,22 +78,36 @@ MainWindow::~MainWindow()
     delete closeTray;
 }
 
-int inline ConvStrChar(std::string szStr, char *szBuff)
+//int inline ConvStrChar(std::string szStr, char *szBuff)
+//{
+//    int	nLen = szStr.length();
+
+//    nLen = (nLen < 254)? nLen : 254;		// Get min(nLeng,nSize)	- 254 = max buff
+//    for (int i = 0; i < nLen; i ++)
+//        szBuff[i] = (char)szStr[i];
+
+//    szBuff[nLen] = 0x00;
+//    return nLen;
+//}
+
+void MainWindow::OpenFileDlg()
 {
-    int	nLen = szStr.length();
-
-    nLen = (nLen < 254)? nLen : 254;		// Get min(nLeng,nSize)	- 254 = max buff
-    for (int i = 0; i < nLen; i ++)
-        szBuff[i] = (char)szStr[i];
-
-    szBuff[nLen] = 0x00;
-    return nLen;
+    QString filename = QFileDialog::getOpenFileName(
+                this,
+                tr("Open File"),
+                "./Video",
+                "Video files (*.avi);;All files (*.*)"
+                );
+    gStrVideoFile = filename.toStdString();
 }
 
 void MainWindow::StartCam()
 {
-    if (frmView)
-        return;
+    if (frmView->m_worker->m_pFrame)
+        return;    
+
+
+
 
     if (!this->ui->radioMouse->isChecked())
     {
@@ -96,15 +119,17 @@ void MainWindow::StartCam()
             msgBox.setText("Invalid tracking rect!");
             msgBox.exec();
             return;
-
         }
     }
 
 
-    frmView = new VideoDisplay();
-    frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    frmView->show();
-    gIsVideoShown = true;
+//    frmView = new VideoDisplay();
+//    frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+//    frmView->show();
+//    gIsVideoShown = true;
+
+    frmView->m_worker->m_strVideoFile = gStrVideoFile;
+    frmView->m_strVideoFile = gStrVideoFile;
 
     frmView->m_IsMouseOn = this->ui->radioMouse->isChecked();
     if (!frmView->m_IsMouseOn)
@@ -113,17 +138,23 @@ void MainWindow::StartCam()
         frmView->m_rectHeightInit = (this->ui->EditHeight->text()).toDouble();
     }
 
+
     this->ui->radioMouse->setEnabled(false);
     this->ui->radioJoystick->setEnabled(false);
     this->ui->ShowHide->setText("Hide");
 
     gSendTimer->start(100);
 
+    frmView->InitTimer();
+
+    frmView->m_worker->abort();
+    frmView->m_thread->wait();
+    frmView->m_worker->requestWork();
 }
 
 void MainWindow::StopCam()
 {
-    if (!frmView)
+    if (!frmView->m_worker->m_pFrame)
         return;
 
     EndSaving();
@@ -131,23 +162,45 @@ void MainWindow::StopCam()
     gSendTimer->stop();
     this->ui->chkRec->setChecked(false);
 
-    frmView->StopTracking();
-    frmView->close();
-    delete frmView;
     this->ui->radioMouse->setEnabled(true);
     this->ui->radioJoystick->setEnabled(true);
 
-    frmView = NULL;
+    gStrVideoFile = "";
+
+    frmView->m_worker->abort();
+    if(!frmView->m_thread->wait(5000))
+    {
+        frmView->m_thread->terminate();
+        QApplication::quit();
+        return;
+    }
+
+    frmView->resetPaint();
+
+//    frmView->close();
+//    delete frmView;
+
+//    frmView = NULL;
 }
 
 
 void MainWindow::on_Start_clicked()
-{
+{    
+    if (frmView->m_worker->m_IsCapturing)
+        return;
+
+    if (frmView->m_worker->m_pFrame)
+        return;
+
+    gStrVideoFile = "";
+
     StartCam();
 }
 
 void MainWindow::on_Stop_clicked()
 {
+    if (!frmView->m_worker->m_pFrame)
+        return;    
 
     StopCam();
 }
@@ -160,20 +213,7 @@ void MainWindow::closeEvent (QCloseEvent *event)
         event->ignore();
     }
 
-//    QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
-//                                                                tr("Are you sure?\n"),
-//                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
-//                                                                QMessageBox::Yes);
-//    if (resBtn != QMessageBox::Yes)
-//    {
-//        event->ignore();
-//    }
-//    else
-//    {
-//        if (frmView)
-//            StopCam();
-//        event->accept();
-//    }
+
 }
 
 
@@ -185,7 +225,7 @@ void MainWindow::on_btnTrack_clicked()
     if (frmView->m_IsMouseOn)
         return;
 
-    if (frmView->m_IsTracking)
+    if (frmView->m_worker->m_IsTracking)
         return;
 
     RECT inputRECT;
@@ -195,7 +235,9 @@ void MainWindow::on_btnTrack_clicked()
     inputRECT.right		= m_Config._config.frmWidth / 2 + frmView->m_rectWidthInit / 2;
     inputRECT.bottom	= m_Config._config.frmHeight / 2 + frmView->m_rectHeightInit / 2;
 
-    frmView->StartTracking(inputRECT);
+
+    frmView->m_worker->StartTracking(inputRECT);
+
 }
 
 void MainWindow::on_btnRelease_clicked()
@@ -203,10 +245,7 @@ void MainWindow::on_btnRelease_clicked()
     if (!frmView)
         return;
 
-//    if (frmView->m_IsMouseOn)
-//        return;
-
-    frmView->StopTracking();
+    frmView->m_worker->StopTracking();
 }
 
 void MainWindow::on_ShowHide_clicked()
@@ -232,31 +271,36 @@ void MainWindow::on_ShowHide_clicked()
 
 void MainWindow::on_cbtnIncrease_clicked()
 {
-    if (!frmView)
+    if (frmView->m_worker->m_IsCapturing)
+        return;
+    if (!frmView->m_worker->m_pFrame)
         return;
     if (frmView->m_IsMouseOn)
         return;
-    if (frmView->m_IsTracking)
+    if (frmView->m_worker->m_IsTracking)
         return;
     if (frmView->m_rectWidthInit >= m_Config._config.frmWidth*0.8f)
         return;
     if (frmView->m_rectHeightInit >= m_Config._config.frmWidth*0.8f)
-        return;
+        return;    
 
     frmView->m_rectWidthInit = frmView->m_rectWidthInit*1.1f;
     frmView->m_rectHeightInit = frmView->m_rectHeightInit*1.1f;
 
     this->ui->EditWidth->setText(QString::number(frmView->m_rectWidthInit));
     this->ui->EditHeight->setText(QString::number(frmView->m_rectHeightInit));
+
 }
 
 void MainWindow::on_cbtnDecrease_clicked()
 {
-    if (!frmView)
+    if (frmView->m_worker->m_IsCapturing)
         return;
+    if (!frmView->m_worker->m_pFrame)
+        return;    
     if (frmView->m_IsMouseOn)
         return;
-    if (frmView->m_IsTracking)
+    if (frmView->m_worker->m_IsTracking)
         return;
     if (frmView->m_rectWidthInit <= 30)
         return;
@@ -287,10 +331,11 @@ void MainWindow::BeginSaving()
 
     strFileName = "./Video/" + strFileName + ".avi";
 
-    ConvStrChar(strFileName, szTmp);
+    fn_ConvStrChar(strFileName, szTmp);
 
     if (frmView)
         frmView->m_Writer = cvCreateVideoWriter(szTmp, nCodec, this->ui->FpsEdit->text().toDouble(), gVideoSize);
+        //frmView->m_Writer = cvCreateVideoWriter(szTmp, nCodec, 18.5, gVideoSize);
 
 }
 
@@ -336,12 +381,24 @@ void MainWindow::on_chkRec_clicked(bool checked)
         return;
     }
 
+    if (!frmView->m_worker->m_pFrame)
+    {
+        ui->chkRec->setChecked(false);
+        return;
+    }
+
+    if (frmView->m_strVideoFile != "") // playing video file
+    {
+        ui->chkRec->setChecked(false);
+        return;
+    }
+
     if (checked)
     {
-        if (((this->ui->FpsEdit->text()).toDouble() < 16)||((this->ui->FpsEdit->text()).toDouble() > 30))
+        if (((this->ui->FpsEdit->text()).toDouble() < 15)||((this->ui->FpsEdit->text()).toDouble() > 30))
         {
             QMessageBox msgBox;
-            msgBox.setText("Invalid FPS (FPS = 16 - 30!");
+            msgBox.setText("Invalid FPS (FPS = 15 - 30!");
             msgBox.exec();
             ui->chkRec->setChecked(false);
             return;
@@ -387,13 +444,13 @@ void MainWindow::showHideWindow()
     if(this->isVisible())
     {
         this->hide();
-        showHideTray->setIcon(QIcon("./Icon/Show.ico"));
+        showHideTray->setIcon(QIcon("./Icon/Show.png"));
         showHideTray->setText("Show TrackCam Window");
     }
     else
     {
         this->show();
-        showHideTray->setIcon(QIcon("./Icon/Hide.ico"));
+        showHideTray->setIcon(QIcon("./Icon/Hide.png"));
         showHideTray->setText("Hide TrackCam Window");
     }
 }
@@ -406,7 +463,7 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::setTrayIcon()
 {
-    trayIcon->setIcon(QIcon("./Icon/TrackCam.ico"));
+    trayIcon->setIcon(QIcon("./Icon/TrackCam.png"));
 }
 
 void MainWindow::createTrayIcon()
@@ -427,10 +484,10 @@ void MainWindow::createTrayActions()
 {
     showHideTray = new QAction(tr("&Hide TrackCam Window"), this);
     connect(showHideTray, SIGNAL(triggered()), this, SLOT(showHideWindow()));
-    showHideTray->setIcon(QIcon("./Icon/Hide.ico"));
+    showHideTray->setIcon(QIcon("./Icon/Hide.png"));
     closeTray = new QAction(tr("&Exit"), this);
     connect(closeTray, SIGNAL(triggered()), this, SLOT(on_btnExit_clicked()));
-    closeTray->setIcon(QIcon("./Icon/Exit.ico"));
+    closeTray->setIcon(QIcon("./Icon/Exit.png"));
 }
 
 
@@ -438,7 +495,7 @@ void MainWindow::on_btnExit_clicked()
 {
         QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
                                                                     tr("Are you sure?\n"),
-                                                                    QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                                    QMessageBox::No | QMessageBox::Yes,
                                                                     QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
         {
@@ -468,7 +525,7 @@ void MainWindow::ProcMsgControl()
         datagram.resize(m_CamUdpSocket->pendingDatagramSize());
         m_CamUdpSocket->readDatagram(datagram.data(), datagram.size());
 
-        if (datagram.at(0) != 0xFF)
+        if (datagram.at(0)!= -1)
             break;
 
         if (datagram.at(1) == 0x01)         // start tracking
@@ -510,13 +567,27 @@ void MainWindow::OnTimerSend()
 {
     if (!frmView)
         return;
-    if (!frmView->m_IsTracking)
+    if (!frmView->m_worker->m_IsTracking)
         return;
 
-    CvRect	nCvRectBox = cvRect(0, 0, 0, 0);
-    utl_ConvertRectToBox(frmView->m_rectCurrent, &nCvRectBox);
-    gCenterX = ((nCvRectBox.x + nCvRectBox.width / 2) - (m_Config._config.frmWidth / 2)) * 100 / m_Config._config.frmWidth;
-    gCenterY = ((nCvRectBox.y + nCvRectBox.height / 2) - (m_Config._config.frmHeight / 2)) * 100 / m_Config._config.frmHeight;
+    SendMsgTrkPos(frmView->m_centerX, frmView->m_centerY);
+}
 
-    SendMsgTrkPos(gCenterX, gCenterY);
+void MainWindow::on_OpenFile_clicked()
+{
+    if (frmView->m_worker->m_IsCapturing)
+        return;
+
+    if (frmView->m_worker->m_pFrame)
+        return;
+
+    OpenFileDlg();
+
+    if (gStrVideoFile != "")
+    {
+        this->ui->radioMouse->setChecked(true);
+        this->ui->radioJoystick->setChecked(false);
+        StartCam();
+    }
+
 }
