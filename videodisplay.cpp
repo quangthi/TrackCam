@@ -536,7 +536,7 @@ void VideoDisplay::OnTimerDrawImage()
         _nCaptureTimeOut++;
     else
         _nCaptureTimeOut = 0;
-    if (_nCaptureTimeOut >= 250) // timeout 10 seconds
+    if (_nCaptureTimeOut >= 500) // timeout 20 seconds
     {
         _nCaptureTimeOut = 0;
 
