@@ -70,9 +70,9 @@ void VideoWork::doWork()
 
     if (!_gCapture)
     {
-        QMessageBox msgBox;
-        msgBox.setText("Video not found!");
-        msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setText("Video not found!");
+//        msgBox.exec();
 
         cvReleaseImage(&m_pFrame);
         m_pFrame = NULL;

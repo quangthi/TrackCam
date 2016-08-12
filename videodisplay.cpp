@@ -315,8 +315,12 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
         font.setPointSize(30);
         p.setFont(font);
         p.setPen(QPen(Qt::red, 4));
-        p.drawText(m_Config._config.frmWidth/2 - 80,
-                   m_Config._config.frmHeight /2 +5, "NO VIDEO");
+        if (m_worker->m_IsCapturing)
+            p.drawText(m_Config._config.frmWidth/2 - 80,
+                       m_Config._config.frmHeight /2 +5, "Capturing...");
+        else
+            p.drawText(m_Config._config.frmWidth/2 - 80,
+                       m_Config._config.frmHeight /2 +5, "NO VIDEO");
         return;
     }
 
@@ -533,9 +537,14 @@ void VideoDisplay::mouseReleaseEvent(QMouseEvent *event)
 void VideoDisplay::OnTimerDrawImage()
 {
     if (m_worker->m_IsCapturing)
+    {
         _nCaptureTimeOut++;
+        repaint();
+    }
+
     else
         _nCaptureTimeOut = 0;
+
     if (_nCaptureTimeOut >= 500) // timeout 20 seconds
     {
         _nCaptureTimeOut = 0;
@@ -552,7 +561,11 @@ void VideoDisplay::OnTimerDrawImage()
 
 
     if (!m_worker->m_pFrame)
+    {
+        repaint();
         return;
+    }
+
 
     if (!_bufferFrame)
         _bufferFrame = cvCreateImage(cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight), 8, 3);
