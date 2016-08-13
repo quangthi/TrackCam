@@ -316,8 +316,8 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
         p.setFont(font);
         p.setPen(QPen(Qt::red, 4));
         if (m_worker->m_IsCapturing)
-            p.drawText(m_Config._config.frmWidth/2 - 80,
-                       m_Config._config.frmHeight /2 +5, "Capturing...");
+            p.drawText(m_Config._config.frmWidth/2 - 100,
+                       m_Config._config.frmHeight /2 +5, "Connecting...");
         else
             p.drawText(m_Config._config.frmWidth/2 - 80,
                        m_Config._config.frmHeight /2 +5, "NO VIDEO");
