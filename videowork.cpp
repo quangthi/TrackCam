@@ -111,6 +111,15 @@ void VideoWork::doWork()
 
         _gTrueFrame = cvQueryFrame(_gCapture);
 
+//        if (_gTrueFrame)
+//        {
+//            int _width = _gTrueFrame->width;
+//            int _height = _gTrueFrame->height;
+
+
+//            qDebug() << "width:" << QString::number(_width);
+//            qDebug() << "height:" << QString::number(_height);
+//        }
 
         m_mutex.lock();
         if(!_gTrueFrame )
@@ -129,7 +138,6 @@ void VideoWork::doWork()
 
         bool isTracking = m_IsTracking;
         m_mutex.unlock();
-
 
 
         if (isTracking) // if tracking opt is ON
