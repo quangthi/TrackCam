@@ -12,11 +12,12 @@
 #include "opencv2/core/core.hpp"
 #include <DIRECT.H>
 
-#define FRM_WIDTH       376
-#define FRM_HEIGHT      321
-#define FRM_POS_X       639
-#define FRM_POS_Y       420
+#define FRM_WIDTH       640
+#define FRM_HEIGHT      512
+#define FRM_POS_X       640
+#define FRM_POS_Y       512
 #define CAM_URL         "rtsp://127.0.0.1:8554/cam1_stream1"
+#define CAM_URL_IR      "rtsp://127.0.0.1:8554/cam2_stream1"
 #define TRK_WIDTH       90
 #define TRK_HEIGHT      60
 #define FPS             18.5

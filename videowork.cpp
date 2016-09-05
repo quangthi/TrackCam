@@ -63,6 +63,12 @@ void VideoWork::doWork()
         fn_ConvStrChar(m_Config._config.strCamUrl, szTmp);
         _gCapture = cvCaptureFromFile(szTmp);
     }
+    else if (m_Config._config.ipCam == 2)
+    {
+        char szTmp[255];
+        fn_ConvStrChar(m_Config._config.strCamUrl_ir, szTmp);
+        _gCapture = cvCaptureFromFile(szTmp);
+    }
     else if (m_Config._config.ipCam == 0)
         _gCapture = cvCaptureFromCAM(0);
 

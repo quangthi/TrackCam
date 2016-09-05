@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Init sending timer
     gSendTimer = new QTimer();
     connect(gSendTimer, SIGNAL(timeout()), this, SLOT(OnTimerSend()));
+    gSendTimer->start(100);
 
     gVideoSize = cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
 
@@ -53,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
     frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     frmView->show();
     gIsVideoShown = true;
+
+    gStrVideoFile = "";
+
+    StartCam();
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +75,7 @@ MainWindow::~MainWindow()
     m_Config._config.trkWidth = this->ui->EditWidth->text().toDouble();
     m_Config._config.trkHeight = this->ui->EditHeight->text().toDouble();
     m_Config._config.fps = this->ui->FpsEdit->text().toDouble();
+    //m_Config._config.strCamUrl = frmView->m_worker->m_Config._config.strCamUrl;
     m_Config.SaveToFile();
     delete ui;
     delete trayIcon;
@@ -159,7 +165,7 @@ void MainWindow::StopCam()
 
     EndSaving();
     gSaveTimer->stop();
-    gSendTimer->stop();
+    //gSendTimer->stop();
     this->ui->chkRec->setChecked(false);
 
     this->ui->radioMouse->setEnabled(true);
@@ -536,6 +542,22 @@ void MainWindow::ProcMsgControl()
             on_cbtnIncrease_clicked();
         else if (datagram.at(1) == 0x02)    // decrease tracking rectangle
             on_cbtnDecrease_clicked();
+        else if (datagram.at(1) == 0x04)    // view daylight cam
+        {
+            on_Stop_clicked();
+            frmView->m_worker->m_Config._config.ipCam = 1;
+            m_Config._config.ipCam = 1;
+            //ui->chkCam->setChecked(false);
+            on_Start_clicked();
+        }
+        else if (datagram.at(1) == 0x05)    // view IR cam
+        {
+            on_Stop_clicked();
+            frmView->m_worker->m_Config._config.ipCam = 2;
+            m_Config._config.ipCam = 2;
+            //ui->chkCam->setChecked(true);
+            on_Start_clicked();
+        }
 
         break;
     }
@@ -551,13 +573,25 @@ void MainWindow::SendMsgTrkPos(short int nX, short int nY)
     // Header
     datagram[0] = 0xFF;
 
-    // X
-    datagram[1] = BYTE(nX >> 8);
-    datagram[2] = BYTE(nX );
+    if (frmView->m_worker->m_IsTracking)
+    {
+        // X
+        datagram[1] = BYTE(nX >> 8);
+        datagram[2] = BYTE(nX );
 
-    // Y
-    datagram[3] = BYTE(nY >> 8);
-    datagram[4] = BYTE(nY	   );
+        // Y
+        datagram[3] = BYTE(nY >> 8);
+        datagram[4] = BYTE(nY	   );
+    }
+    else
+    {
+        datagram[1] = BYTE(0x00 >> 8);
+        datagram[2] = BYTE(0x00 );
+
+        datagram[3] = BYTE(0x00 >> 8);
+        datagram[4] = BYTE(0x00	   );
+
+    }
 
     m_CamUdpSocket->writeDatagram(datagram, QHostAddress::LocalHost, REMOTE_UDP_PORT);
 
@@ -567,8 +601,8 @@ void MainWindow::OnTimerSend()
 {
     if (!frmView)
         return;
-    if (!frmView->m_worker->m_IsTracking)
-        return;
+//    if (!frmView->m_worker->m_IsTracking)
+//        return;
 
     SendMsgTrkPos(frmView->m_centerX, frmView->m_centerY);
 }

@@ -435,9 +435,6 @@
      <string notr="true" comment="asd ">Record:</string>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="1">
-      <widget class="QCustomEdit" name="FpsEdit"/>
-     </item>
      <item row="1" column="1">
       <widget class="QCustomComboBox" name="cbSavePeriod">
        <item>
@@ -462,12 +459,8 @@
        </item>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>Interval:</string>
-       </property>
-      </widget>
+     <item row="0" column="1">
+      <widget class="QCustomEdit" name="FpsEdit"/>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_7">
@@ -478,6 +471,13 @@
        </property>
        <property name="text">
         <string>Frame rate:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Interval:</string>
        </property>
       </widget>
      </item>
@@ -672,12 +672,6 @@
      </item>
     </layout>
    </widget>
-   <zorder>groupBox</zorder>
-   <zorder>groupBox_5</zorder>
-   <zorder>groupBox_8</zorder>
-   <zorder>groupBox_6</zorder>
-   <zorder>cbtnIncrease</zorder>
-   <zorder>cbtnIncrease</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

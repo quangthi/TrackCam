@@ -84,7 +84,6 @@ private slots:
     void on_btnExit_clicked();
     void OnTimerSend();
 
-
 };
 
 #endif // MAINWINDOW_H

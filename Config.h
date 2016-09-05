@@ -12,7 +12,7 @@
 
 struct Config_t
 {
-    std::string strCamUrl;
+    std::string strCamUrl, strCamUrl_ir;
     short frmWidth, frmHeight, frmPosX, frmPosY, trkWidth, trkHeight, ipCam;
     double fps;
 };

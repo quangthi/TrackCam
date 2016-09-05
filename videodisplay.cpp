@@ -547,16 +547,17 @@ void VideoDisplay::OnTimerDrawImage()
 
     if (_nCaptureTimeOut >= 500) // timeout 20 seconds
     {
-        _nCaptureTimeOut = 0;
+        QApplication::quit();
+//        _nCaptureTimeOut = 0;
 
-        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
-                                                                    tr("Video not found!\n Exit Application?\n"),
-                                                                    QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-            QApplication::quit();
-        }
+//        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
+//                                                                    tr("Video not found!\n Exit Application?\n"),
+//                                                                    QMessageBox::No | QMessageBox::Yes,
+//                                                                    QMessageBox::Yes);
+//        if (resBtn == QMessageBox::Yes)
+//        {
+//            QApplication::quit();
+//        }
     }
 
 
