@@ -105,14 +105,13 @@ void VideoWork::doWork()
         // Checks if the process should be aborted
         m_mutex.lock();
         bool abort = m_abort;
-        m_mutex.unlock();
+        m_mutex.unlock();        
 
         if (abort)
         {
             qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
             break;
         }
-
 
 
         _gTrueFrame = cvQueryFrame(_gCapture);
@@ -130,12 +129,12 @@ void VideoWork::doWork()
         m_mutex.lock();
         if(!_gTrueFrame )
         {
-            _gCapture = NULL;
-            cvReleaseImage(&m_pFrame);
-            m_pFrame = NULL;
+            //_gCapture = NULL;
+            //cvReleaseImage(&m_pFrame);
+            //m_pFrame = NULL;
             m_IsTracking = false;
-             m_mutex.unlock();
-            break;
+            m_mutex.unlock();
+            continue;
         }
         else if (_gTrueFrame)
         {

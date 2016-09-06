@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
 
     if( !shared.create( 512, QSharedMemory::ReadWrite) )
     {
-        QMessageBox msgBox;
-        msgBox.setText( QObject::tr("Can't start more than one instance of TrackCam!") );
-        msgBox.setIcon( QMessageBox::Critical );
-        msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setText( QObject::tr("Can't start more than one instance of TrackCam!") );
+//        msgBox.setIcon( QMessageBox::Critical );
+//        msgBox.exec();
         exit(0);
     }
 

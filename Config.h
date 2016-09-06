@@ -7,7 +7,7 @@
 #include <string>
 #include "Utility.h"
 
-#define CFG_FILE        "config.isc"
+#define CFG_FILE        "C:\\config.isc"
 
 
 struct Config_t
