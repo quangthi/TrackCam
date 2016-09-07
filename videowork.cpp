@@ -113,8 +113,18 @@ void VideoWork::doWork()
             break;
         }
 
+        try
+        {
+            _gTrueFrame = cvQueryFrame(_gCapture);
+           // phan code duoc bao ve
+        }catch(...)
+        {
+            continue;
+          // phan code de xu ly bat ky kieu ngoai le nao
+        }
 
-        _gTrueFrame = cvQueryFrame(_gCapture);
+
+
 
 //        if (_gTrueFrame)
 //        {

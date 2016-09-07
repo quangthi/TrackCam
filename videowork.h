@@ -22,7 +22,7 @@ public:
     void requestWork();
     void abort();
     void StartTracking(RECT inputRECT);
-    void StopTracking();
+    void StopTracking();    
 
 private:
     bool    m_abort;

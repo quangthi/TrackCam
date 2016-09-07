@@ -12,7 +12,6 @@ bool                        _isSelecting = false;
 
 int                         _nCaptureTimeOut = 0;
 
-
 // for putting text to frame
 CvFont      cvTxtFont;
 double      hScale = 0.5;
@@ -41,6 +40,10 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
     m_rectCurrent.bottom = 0;
     m_centerX   = 0;
     m_centerY   = 0;
+    m_Zoom      = 1;
+    m_Focus     = 0;
+    m_Azi       = 0;
+    m_Ele       = 0;
 
     _drawTimer = new QTimer();
     connect(_drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDrawImage()));
@@ -302,6 +305,13 @@ void VideoDisplay::resetPaint()
     repaint();
 }
 
+void VideoDisplay::ResetRectCurrent()
+{
+    m_rectCurrent.left = 0;
+    m_rectCurrent.top = 0;
+    m_rectCurrent.right = 0;
+    m_rectCurrent.bottom = 0;
+}
 
 
 void VideoDisplay::paintEvent(QPaintEvent *event)
@@ -343,28 +353,37 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
         font.setPointSize(11);
         p.setFont(font);
 
-        if (m_worker->m_IsTracking)
-            p.setPen(QPen(Qt::green, 2));
-        else
-            p.setPen(QPen(Qt::red, 2));
 
-        QString tmpStr ="";
-        tmpStr += QString::number(m_centerX);
-        tmpStr += " x ";
-        tmpStr += QString::number(m_centerY);
-        p.drawText(m_Config._config.frmWidth - 65, m_Config._config.frmHeight - 12,tmpStr);
+        p.setPen(QPen(QColor(0,255,255), 2));
+
+
+        QString tmpStr ="Zoom : ";
+        tmpStr += QString::number(m_Zoom);
+        tmpStr += "x";
+        p.drawText(6, 16,tmpStr);
+
+        tmpStr ="Focus : ";
+        tmpStr += QString::number(m_Focus);
+        p.drawText(5, 34,tmpStr);
+
+        tmpStr =QString::fromUtf8("Ph.vị  : ");
+        tmpStr += QString::number(m_Azi/100.0f);
+        p.drawText(7, 52,tmpStr);
+
+        tmpStr =QString::fromUtf8("Góc tà: ");
+        tmpStr += QString::number(m_Ele/100.0f);
+        p.drawText(5, 70,tmpStr);
+
 
         if (m_Writer)
         {
             p.setPen(QPen(Qt::red, 2));
-            p.drawText(m_Config._config.frmWidth - 85,
-                       18, "Recording...");
+            p.drawText(m_Config._config.frmWidth - 85, m_Config._config.frmHeight - 10, "Recording...");
         }
     }
 
-
     if (!m_worker->m_IsTracking && !m_IsMouseOn)
-    {
+    {        
         //QRect rect1(m_Config._config.frmWidth / 2 - m_rectWidthInit / 2, m_Config._config.frmHeight / 2 - m_rectHeightInit / 2, m_rectWidthInit, m_rectHeightInit);
         p.setPen(QPen(Qt::red, 2));
         //p.setBrush(QBrush(Qt::transparent));
@@ -414,8 +433,16 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
     else if (m_worker->m_IsTracking)
     {
-        m_rectCurrent = m_worker->m_rectCurrent;
-        p.setPen(QPen(Qt::green, 1));
+        if ((m_rectCurrent.top == 0) && (m_rectCurrent.bottom == 0))
+            m_rectCurrent = m_worker->m_rectCurrent;
+        else
+        {
+            m_rectCurrent.top = (int)(0.3f*m_worker->m_rectCurrent.top + 0.7f*m_rectCurrent.top);
+            m_rectCurrent.bottom = (int)(0.3f*m_worker->m_rectCurrent.bottom + 0.7f*m_rectCurrent.bottom);
+            m_rectCurrent.left = (int)(0.3f*m_worker->m_rectCurrent.left + 0.7f*m_rectCurrent.left);
+            m_rectCurrent.right = (int)(0.3f*m_worker->m_rectCurrent.right + 0.7f*m_rectCurrent.right);
+        }
+        p.setPen(QPen(QColor(0,255,255), 1));
 
         QPoint lefttop[3] = {
             QPoint(m_rectCurrent.left, m_rectCurrent.top + 10),
@@ -449,11 +476,16 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
 void VideoDisplay::mousePressEvent(QMouseEvent *event)
 {
-    if (!m_IsMouseOn)
-        return;
 
     if (!m_worker->m_pFrame)
         return;
+
+    if (!m_IsMouseOn)
+    {
+        m_IsMouseOn = true;
+    }
+
+        //return;
 
     if(event->buttons() & Qt::LeftButton)
     {
@@ -461,7 +493,7 @@ void VideoDisplay::mousePressEvent(QMouseEvent *event)
 
         if(videoRect.contains(event->x(),event->y()))
         {
-            m_worker->m_IsTracking = false;
+            m_worker->m_IsTracking = false;            
             _isSelecting = true;
             trackingRect.left = event->x() - videoRect.left();
             trackingRect.top = event->y() - videoRect.top();
@@ -500,6 +532,8 @@ void VideoDisplay::mouseReleaseEvent(QMouseEvent *event)
     if (!m_worker->m_pFrame)
         return;
 
+    m_IsMouseOn = false;
+
     if(_isSelecting)
     {
         QRect videoRect(0, 0, m_Config._config.frmWidth, m_Config._config.frmHeight);
@@ -527,8 +561,9 @@ void VideoDisplay::mouseReleaseEvent(QMouseEvent *event)
         if(trackingRect.bottom > m_Config._config.frmHeight - 1)
             trackingRect.bottom = m_Config._config.frmHeight - 1;
 
+        ResetRectCurrent();
         m_worker->StartTracking(trackingRect);
-        _isSelecting = false;
+        _isSelecting = false;        
     }
 
     QMainWindow::mouseReleaseEvent(event);
@@ -596,7 +631,7 @@ void VideoDisplay::OnTimerDrawImage()
     {
         szTime  = GetTimeString().toStdString();
         fn_ConvStrChar(szTime, szTmp);
-        cvPutText(_bufferFrame, szTmp, cvPoint(3, 15), &cvTxtFont, cvScalar(255, 255, 255));
+        cvPutText(_bufferFrame, szTmp, cvPoint(3, m_Config._config.frmHeight - 15), &cvTxtFont, cvScalar(255, 255, 255));
     }
 
     repaint();

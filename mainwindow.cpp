@@ -7,6 +7,7 @@ bool        gIsVideoShown = false;
 QTimer      *gSaveTimer, *gSendTimer;
 CvSize      gVideoSize;
 std::string gStrVideoFile = "";
+bool        gIsHide = false;
 // Position for sending
 //short int	gCenterX = 0;
 //short int	gCenterY = 0;
@@ -29,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->FpsEdit->setValidator( new QDoubleValidator(15.0, 30.0, 1, this));
 
     InitNetwork();
+
+    SendMsgTrkPos(0, 0);
 
     // create tray item
     createTrayActions();
@@ -113,8 +116,6 @@ void MainWindow::StartCam()
         return;    
 
 
-
-
     if (!this->ui->radioMouse->isChecked())
     {
         if (((this->ui->EditWidth->text()).toDouble() < 30)||((this->ui->EditHeight->text()).toDouble() < 30)
@@ -156,6 +157,7 @@ void MainWindow::StartCam()
     frmView->m_worker->abort();
     frmView->m_thread->wait();
     frmView->m_worker->requestWork();
+
 }
 
 void MainWindow::StopCam()
@@ -200,7 +202,7 @@ void MainWindow::on_Start_clicked()
 
     gStrVideoFile = "";
 
-    StartCam();
+    StartCam();    
 }
 
 void MainWindow::on_Stop_clicked()
@@ -242,6 +244,7 @@ void MainWindow::on_btnTrack_clicked()
     inputRECT.bottom	= m_Config._config.frmHeight / 2 + frmView->m_rectHeightInit / 2;
 
 
+    frmView->ResetRectCurrent();
     frmView->m_worker->StartTracking(inputRECT);
 
 }
@@ -252,6 +255,7 @@ void MainWindow::on_btnRelease_clicked()
         return;
 
     frmView->m_worker->StopTracking();
+
 }
 
 void MainWindow::on_ShowHide_clicked()
@@ -525,38 +529,70 @@ void MainWindow::ProcMsgControl()
     if (!frmView)
         return;
 
+    // Hide main window form if receive control packet
+    if(this->isVisible() && (!gIsHide))
+    {
+        this->hide();
+        showHideTray->setIcon(QIcon("./Icon/Show.png"));
+        showHideTray->setText("Show TrackCam Window");
+        gIsHide = true;
+    }
+
     while (m_CamUdpSocket->hasPendingDatagrams())
     {
         QByteArray datagram;
         datagram.resize(m_CamUdpSocket->pendingDatagramSize());
         m_CamUdpSocket->readDatagram(datagram.data(), datagram.size());
+        unsigned char *dataRecv = (unsigned char*)datagram.data();
 
-        if (datagram.at(0)!= -1)
-            break;
 
-        if (datagram.at(1) == 0x01)         // start tracking
-            on_btnTrack_clicked();
-        else if (datagram.at(1) == 0x00)    // stop tracking
-            on_btnRelease_clicked();
-        else if (datagram.at(1) == 0x03)    // increase tracking rectangle
-            on_cbtnIncrease_clicked();
-        else if (datagram.at(1) == 0x02)    // decrease tracking rectangle
-            on_cbtnDecrease_clicked();
-        else if (datagram.at(1) == 0x04)    // view daylight cam
+        if (dataRecv[0]== 0xFF)                // Header: 0xFF
         {
-            on_Stop_clicked();
-            frmView->m_worker->m_Config._config.ipCam = 1;
-            m_Config._config.ipCam = 1;
-            //ui->chkCam->setChecked(false);
-            on_Start_clicked();
+            if (dataRecv[1] == 0x01)         // start tracking
+                on_btnTrack_clicked();
+            else if (dataRecv[1] == 0x00)    // stop tracking
+                on_btnRelease_clicked();
+            else if (dataRecv[1] == 0x03)    // increase tracking rectangle
+                on_cbtnIncrease_clicked();
+            else if (dataRecv[1] == 0x02)    // decrease tracking rectangle
+                on_cbtnDecrease_clicked();
+            else if (dataRecv[1] == 0x04)    // view daylight cam
+            {
+                on_Stop_clicked();
+                frmView->m_worker->m_Config._config.ipCam = 1;
+                m_Config._config.ipCam = 1;
+                m_Config.SaveToFile();
+                //ui->chkCam->setChecked(false);
+                on_Start_clicked();
+            }
+            else if (dataRecv[1] == 0x05)    // view IR cam
+            {
+                on_Stop_clicked();
+                frmView->m_worker->m_Config._config.ipCam = 2;
+                m_Config._config.ipCam = 2;
+                m_Config.SaveToFile();
+                //ui->chkCam->setChecked(true);
+                on_Start_clicked();
+            }
+
         }
-        else if (datagram.at(1) == 0x05)    // view IR cam
+        else if (dataRecv[0]== 0xFD)           // Xu ly tham so ve do Focus
         {
-            on_Stop_clicked();
-            frmView->m_worker->m_Config._config.ipCam = 2;
-            m_Config._config.ipCam = 2;
-            //ui->chkCam->setChecked(true);
-            on_Start_clicked();
+            frmView->m_Focus = dataRecv[1];
+        }
+        else if (dataRecv[0]== 0xFE)           // Xu ly tham so ve do Zoom
+        {
+            frmView->m_Zoom = dataRecv[1];
+        }
+        else if (dataRecv[0]== 0xFC)           // Xu ly tham so ve do Goc ta Ele
+        {
+            frmView->m_Ele = ((dataRecv[1]<<8)|(dataRecv[2]));
+            if (frmView->m_Ele > 18000)
+                frmView->m_Ele -= 36000;
+        }
+        else if (dataRecv[0]== 0xFB)           // Xu ly tham so ve do Goc phuong vi Azi
+        {
+            frmView->m_Azi = ((dataRecv[1]<<8)|(dataRecv[2]));
         }
 
         break;
@@ -571,9 +607,17 @@ void MainWindow::SendMsgTrkPos(short int nX, short int nY)
     datagram.resize(5);
 
     // Header
-    datagram[0] = 0xFF;
+    datagram[0] = 0xFF;    
 
-    if (frmView->m_worker->m_IsTracking)
+    if ((nX == 0x00) && (nY == 0x00))
+    {
+        datagram[1] = BYTE(0x00 >> 8);
+        datagram[2] = BYTE(0x00 );
+
+        datagram[3] = BYTE(0x00 >> 8);
+        datagram[4] = BYTE(0x00	   );
+    }
+    else if (frmView->m_worker->m_IsTracking)
     {
         // X
         datagram[1] = BYTE(nX >> 8);

@@ -28,6 +28,10 @@ public:
     //std::string     m_strVideoFile;
     short int       m_centerX;
     short int       m_centerY;
+    short int       m_Zoom;
+    short int       m_Focus;
+    int             m_Azi;
+    int             m_Ele;
 
     QThread         *m_thread;
     VideoWork       *m_worker;
@@ -39,6 +43,7 @@ public:
     ~VideoDisplay();    
     void InitTimer();
     void resetPaint();
+    void ResetRectCurrent();
 
 private:
     Ui::VideoDisplay *ui;

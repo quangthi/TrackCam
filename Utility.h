@@ -16,10 +16,10 @@
 #define FRM_HEIGHT      512
 #define FRM_POS_X       640
 #define FRM_POS_Y       512
-//#define CAM_URL         "rtsp://127.0.0.1:8554/cam1_stream1"
-//#define CAM_URL_IR      "rtsp://127.0.0.1:8554/cam2_stream1"
-#define CAM_URL         "udp://@192.168.150.182:15004"
-#define CAM_URL_IR      "udp://@192.168.150.182:15006"
+#define CAM_URL         "rtsp://127.0.0.1:8554/cam1_stream1"
+#define CAM_URL_IR      "rtsp://127.0.0.1:8554/cam2_stream1"
+//#define CAM_URL         "udp://@192.168.150.182:15004"
+//#define CAM_URL_IR      "udp://@192.168.150.182:15006"
 #define TRK_WIDTH       90
 #define TRK_HEIGHT      60
 #define FPS             18.5
