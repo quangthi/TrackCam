@@ -7,7 +7,9 @@
 #include <string>
 #include "Utility.h"
 
-#define CFG_FILE        "C:\\config.isc"
+#define CFG_FILE            "C:\\Program Files\\NHCamera\\config.isc"
+#define VIDEO_PATH          "D://VideoRecord/"
+#define CONF_PATH           "C://Program Files//NHCamera/"
 
 
 struct Config_t

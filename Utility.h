@@ -21,7 +21,7 @@
 //#define CAM_URL         "udp://@192.168.150.182:15004"
 //#define CAM_URL_IR      "udp://@192.168.150.182:15006"
 #define TRK_WIDTH       90
-#define TRK_HEIGHT      60
+#define TRK_HEIGHT      72
 #define FPS             18.5
 #define LOCAL_UDP_PORT  8000
 #define REMOTE_UDP_PORT 8001

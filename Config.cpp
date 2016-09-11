@@ -1,4 +1,5 @@
 #include "Config.h"
+#include "qdir.h"
 
 CConfig::CConfig()
 {
@@ -6,7 +7,10 @@ CConfig::CConfig()
 }
 
 bool CConfig::LoadConfigFile()
-{
+{           
+    if (!QDir(CONF_PATH).exists())
+        QDir().mkdir(CONF_PATH);
+
     QFile file(CFG_FILE);
     if(!file.open(QIODevice::ReadOnly))
     {

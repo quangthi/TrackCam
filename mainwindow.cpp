@@ -75,11 +75,11 @@ MainWindow::~MainWindow()
     EndSaving();
     gSaveTimer->stop();
     gSendTimer->stop();
-    m_Config._config.trkWidth = this->ui->EditWidth->text().toDouble();
-    m_Config._config.trkHeight = this->ui->EditHeight->text().toDouble();
-    m_Config._config.fps = this->ui->FpsEdit->text().toDouble();
+    //m_Config._config.trkWidth = this->ui->EditWidth->text().toDouble();
+    //m_Config._config.trkHeight = this->ui->EditHeight->text().toDouble();
+    //m_Config._config.fps = this->ui->FpsEdit->text().toDouble();
     //m_Config._config.strCamUrl = frmView->m_worker->m_Config._config.strCamUrl;
-    m_Config.SaveToFile();
+    //m_Config.SaveToFile();
     delete ui;
     delete trayIcon;
     delete trayIconMenu;
@@ -334,12 +334,14 @@ void MainWindow::BeginSaving()
     char		szTmp[255];
     int nCodec = CV_FOURCC('D', 'I', 'V', 'X');
 
-    if (!QDir("Video").exists())
-        QDir().mkdir("Video");
+    if (!QDir(VIDEO_PATH).exists())
+        QDir().mkdir(VIDEO_PATH);
 
     std::string strFileName = GetStrTime().toStdString();
 
-    strFileName = "./Video/" + strFileName + ".avi";
+
+    //strFileName = "./Video/" + strFileName + ".avi";
+    strFileName = VIDEO_PATH  + strFileName + ".avi";
 
     fn_ConvStrChar(strFileName, szTmp);
 
@@ -561,7 +563,7 @@ void MainWindow::ProcMsgControl()
                 on_Stop_clicked();
                 frmView->m_worker->m_Config._config.ipCam = 1;
                 m_Config._config.ipCam = 1;
-                m_Config.SaveToFile();
+                //m_Config.SaveToFile();
                 //ui->chkCam->setChecked(false);
                 on_Start_clicked();
             }
@@ -570,7 +572,7 @@ void MainWindow::ProcMsgControl()
                 on_Stop_clicked();
                 frmView->m_worker->m_Config._config.ipCam = 2;
                 m_Config._config.ipCam = 2;
-                m_Config.SaveToFile();
+                //m_Config.SaveToFile();
                 //ui->chkCam->setChecked(true);
                 on_Start_clicked();
             }
@@ -582,7 +584,7 @@ void MainWindow::ProcMsgControl()
         }
         else if (dataRecv[0]== 0xFE)           // Xu ly tham so ve do Zoom
         {
-            frmView->m_Zoom = dataRecv[1];
+            frmView->m_Zoom = ((dataRecv[1]<<8)|(dataRecv[2]));
         }
         else if (dataRecv[0]== 0xFC)           // Xu ly tham so ve do Goc ta Ele
         {
@@ -593,6 +595,23 @@ void MainWindow::ProcMsgControl()
         else if (dataRecv[0]== 0xFB)           // Xu ly tham so ve do Goc phuong vi Azi
         {
             frmView->m_Azi = ((dataRecv[1]<<8)|(dataRecv[2]));
+        }        
+        else if (dataRecv[0]== 0xFA)           // Ghi luu video
+        {
+            if (dataRecv[1] == 0x01)         // start recording
+            {
+                if (ui->chkRec->isChecked() == false)
+                    on_chkRec_clicked(true);
+                ui->chkRec->setChecked(true);
+            }
+
+            else if (dataRecv[1] == 0x00)    // stop recording
+            {
+                if (ui->chkRec->isChecked() == true)
+                    on_chkRec_clicked(false);
+                ui->chkRec->setChecked(false);
+            }
+
         }
 
         break;

@@ -358,7 +358,7 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
 
         QString tmpStr ="Zoom : ";
-        tmpStr += QString::number(m_Zoom);
+        tmpStr += QString::number(m_Zoom/100.0f);
         tmpStr += "x";
         p.drawText(6, 16,tmpStr);
 
