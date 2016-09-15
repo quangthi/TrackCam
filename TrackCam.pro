@@ -52,6 +52,7 @@ FORMS    += mainwindow.ui \
 #win32:LIBS += -L$$PWD/../armadilloWin32/lib_winx86/ -lblas_win32_MT
 #win32:LIBS += -L$$PWD/../armadilloWin32/lib_winx86/ -llapack_win32_MT
 
+
 INCLUDEPATH += $$PWD/../opencv/build/include
 #debug:
 win32:CONFIG(debug, debug|release):LIBS += -L$$PWD/../opencv/build/x86/vc11/lib/ -lopencv_core2413d

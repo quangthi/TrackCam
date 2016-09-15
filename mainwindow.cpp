@@ -101,11 +101,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::OpenFileDlg()
 {
-    QString filename = QFileDialog::getOpenFileName(
-                this,
-                tr("Open File"),
-                "./Video",
-                "Video files (*.avi);;All files (*.*)"
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open File"), "./Video", "Video files (*.avi *.mp4 *.asf);;All files (*.*)"
                 );
     gStrVideoFile = filename.toStdString();
 }

@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+
     MainWindow w;
     w.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint);
     w.show();

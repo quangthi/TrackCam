@@ -55,16 +55,27 @@ bool CConfig::LoadConfigFile()
 
 void CConfig::setDefault()
 {
-    _config.frmWidth        = FRM_WIDTH;
-    _config.frmHeight       = FRM_HEIGHT;
-    _config.frmPosX         = FRM_POS_X;
-    _config.frmPosY         = FRM_POS_Y;
-    _config.trkWidth        = TRK_WIDTH;
-    _config.trkHeight       = TRK_HEIGHT;
+    QRect rec = QApplication::desktop()->screenGeometry(0);
+
+//    _config.frmWidth        = FRM_WIDTH;
+//    _config.frmHeight       = FRM_HEIGHT;
+//    _config.frmPosX         = FRM_POS_X;
+//    _config.frmPosY         = FRM_POS_Y;
+    _config.frmWidth        = rec.width()/2;
+    _config.frmHeight       = rec.height()/2;
+    _config.frmPosX         = rec.width()/2;
+    _config.frmPosY         = rec.height()/2;
+
+
+//    _config.trkWidth        = TRK_WIDTH;
+//    _config.trkHeight       = TRK_HEIGHT;
+    _config.trkWidth        = rec.width()/12;
+    _config.trkHeight       = rec.height()/12;
     _config.strCamUrl       = CAM_URL;
     _config.strCamUrl_ir    = CAM_URL_IR;
     _config.fps             = FPS;
     _config.ipCam           = 1;
+
 
     SaveToFile();
 }

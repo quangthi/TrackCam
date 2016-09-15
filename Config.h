@@ -1,11 +1,13 @@
 #ifndef CCONFIG_H
 #define CCONFIG_H
 
-
+#include <QApplication>
 #include <QFile>
 #include <QTextStream>
 #include <string>
+#include <QRect>
 #include "Utility.h"
+#include <QtGui>
 
 #define CFG_FILE            "C:\\Program Files\\NHCamera\\config.isc"
 #define VIDEO_PATH          "D://VideoRecord/"
