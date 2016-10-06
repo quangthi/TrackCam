@@ -44,7 +44,7 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
     m_Focus     = 0;
     m_Azi       = 0;
     m_Ele       = 0;
-    m_StringView = "Hello";
+    m_StringView =QString::fromUtf8("Màn hình bám đối tượng - Viện tích hợp hệ thống");
 
     _drawTimer = new QTimer();
     connect(_drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDrawImage()));
@@ -357,25 +357,25 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
         p.setPen(QPen(QColor(0,255,255), 2));
 
-        p.drawText(100, 16, m_StringView);
+        p.drawText(6, 16, m_StringView);
 
 
-        QString tmpStr ="Zoom : ";
-        tmpStr += QString::number(m_Zoom/100.0f);
-        tmpStr += "x";
-        p.drawText(6, 16,tmpStr);
+//        QString tmpStr ="Zoom : ";
+//        tmpStr += QString::number(m_Zoom/100.0f);
+//        tmpStr += "x";
+//        p.drawText(6, 16,tmpStr);
 
-        tmpStr ="Focus : ";
-        tmpStr += QString::number(m_Focus);
-        p.drawText(5, 34,tmpStr);
+//        tmpStr ="Focus : ";
+//        tmpStr += QString::number(m_Focus);
+//        p.drawText(5, 34,tmpStr);
 
-        tmpStr =QString::fromUtf8("Ph.vị  : ");
-        tmpStr += QString::number(m_Azi/100.0f);
-        p.drawText(7, 52,tmpStr);
+//        tmpStr =QString::fromUtf8("Ph.vị  : ");
+//        tmpStr += QString::number(m_Azi/100.0f);
+//        p.drawText(7, 52,tmpStr);
 
-        tmpStr =QString::fromUtf8("Góc tà: ");
-        tmpStr += QString::number(m_Ele/100.0f);
-        p.drawText(5, 70,tmpStr);
+//        tmpStr =QString::fromUtf8("Góc tà: ");
+//        tmpStr += QString::number(m_Ele/100.0f);
+//        p.drawText(5, 70,tmpStr);
 
 
         if (m_Writer)

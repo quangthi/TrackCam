@@ -627,7 +627,7 @@ void MainWindow::ProcMsgControl()
         }
         else
         {
-            frmView->m_StringView = QTextCodec::codecForMib(106)->toUnicode(datagram);
+            frmView->m_StringView = QTextCodec::codecForMib(1015)->toUnicode(datagram);
         }
 
         break;
