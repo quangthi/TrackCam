@@ -44,6 +44,7 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
     m_Focus     = 0;
     m_Azi       = 0;
     m_Ele       = 0;
+    m_StringView = "Hello";
 
     _drawTimer = new QTimer();
     connect(_drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDrawImage()));
@@ -355,6 +356,8 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
 
         p.setPen(QPen(QColor(0,255,255), 2));
+
+        p.drawText(100, 16, m_StringView);
 
 
         QString tmpStr ="Zoom : ";

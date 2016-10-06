@@ -60,13 +60,25 @@ void VideoWork::doWork()
     else if (m_Config._config.ipCam == 1)
     {
         char szTmp[255];
-        fn_ConvStrChar(m_Config._config.strCamUrl, szTmp);
+        fn_ConvStrChar(m_Config._config.strCamUrl_GV, szTmp);
         _gCapture = cvCaptureFromFile(szTmp);
     }
     else if (m_Config._config.ipCam == 2)
     {
         char szTmp[255];
-        fn_ConvStrChar(m_Config._config.strCamUrl_ir, szTmp);
+        fn_ConvStrChar(m_Config._config.strCamUrl_GV_ir, szTmp);
+        _gCapture = cvCaptureFromFile(szTmp);
+    }
+    else if (m_Config._config.ipCam == 3)
+    {
+        char szTmp[255];
+        fn_ConvStrChar(m_Config._config.strCamUrl_IP, szTmp);
+        _gCapture = cvCaptureFromFile(szTmp);
+    }
+    else if (m_Config._config.ipCam == 4)
+    {
+        char szTmp[255];
+        fn_ConvStrChar(m_Config._config.strCamUrl_IP_ir, szTmp);
         _gCapture = cvCaptureFromFile(szTmp);
     }
     else if (m_Config._config.ipCam == 0)

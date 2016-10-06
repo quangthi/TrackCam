@@ -56,6 +56,7 @@ FORMS    += mainwindow.ui \
 #INCLUDEPATH += $$PWD/../opencv/build/include
 INCLUDEPATH += "D:/OpenCV/OpenCV2413/build/include"
 #debug:
+#win32:CONFIG(debug, debug|release):LIBS += -L$$PWD/../opencv/build/x86/vc11/lib/ -lopencv_core2413d
 win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_core2413d
 win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_highgui2413d
 win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_imgproc2413d
@@ -76,6 +77,7 @@ win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc1
 win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_video2413d
 win32:CONFIG(debug, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_videostab2413d
 #release:
+#win32:CONFIG(release, debug|release):LIBS += -L$$PWD/../opencv/build/x86/vc11/lib/ -lopencv_core2413
 win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_core2413
 win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_highgui2413
 win32:CONFIG(release, debug|release):LIBS += -L"D:/OpenCV/OpenCV2413/build/x86/vc11/lib/" -lopencv_imgproc2413

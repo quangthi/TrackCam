@@ -501,16 +501,20 @@ void MainWindow::createTrayActions()
 
 void MainWindow::on_btnExit_clicked()
 {
-        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
-                                                                    tr("Are you sure?\n"),
-                                                                    QMessageBox::No | QMessageBox::Yes,
-                                                                    QMessageBox::Yes);
-        if (resBtn == QMessageBox::Yes)
-        {
-            if (frmView)
-                StopCam();
-            QApplication::quit();
-        }
+//        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "TrackCam",
+//                                                                    tr("Are you sure?\n"),
+//                                                                    QMessageBox::No | QMessageBox::Yes,
+//                                                                    QMessageBox::Yes);
+//        if (resBtn == QMessageBox::Yes)
+//        {
+//            if (frmView)
+//                StopCam();
+//            QApplication::quit();
+//        }
+
+        if (frmView)
+            StopCam();
+        QApplication::quit();
 
 
 }
@@ -543,7 +547,6 @@ void MainWindow::ProcMsgControl()
         m_CamUdpSocket->readDatagram(datagram.data(), datagram.size());
         unsigned char *dataRecv = (unsigned char*)datagram.data();
 
-
         if (dataRecv[0]== 0xFF)                // Header: 0xFF
         {
             if (dataRecv[1] == 0x01)         // start tracking
@@ -557,19 +560,32 @@ void MainWindow::ProcMsgControl()
             else if (dataRecv[1] == 0x04)    // view daylight cam
             {
                 on_Stop_clicked();
-                frmView->m_worker->m_Config._config.ipCam = 1;
-                m_Config._config.ipCam = 1;
-                //m_Config.SaveToFile();
-                //ui->chkCam->setChecked(false);
+                if ((m_Config._config.ipCam == 1)||(m_Config._config.ipCam == 2))
+                {
+                    frmView->m_worker->m_Config._config.ipCam = 1;
+                    m_Config._config.ipCam = 1;
+                }
+                else if ((m_Config._config.ipCam == 3)||(m_Config._config.ipCam == 4))
+                {
+                    frmView->m_worker->m_Config._config.ipCam = 3;
+                    m_Config._config.ipCam = 3;
+                }
+
                 on_Start_clicked();
             }
             else if (dataRecv[1] == 0x05)    // view IR cam
             {
                 on_Stop_clicked();
-                frmView->m_worker->m_Config._config.ipCam = 2;
-                m_Config._config.ipCam = 2;
-                //m_Config.SaveToFile();
-                //ui->chkCam->setChecked(true);
+                if ((m_Config._config.ipCam == 1)||(m_Config._config.ipCam == 2))
+                {
+                    frmView->m_worker->m_Config._config.ipCam = 2;
+                    m_Config._config.ipCam = 2;
+                }
+                else if ((m_Config._config.ipCam == 3)||(m_Config._config.ipCam == 4))
+                {
+                    frmView->m_worker->m_Config._config.ipCam = 4;
+                    m_Config._config.ipCam = 4;
+                }
                 on_Start_clicked();
             }
 
@@ -608,6 +624,10 @@ void MainWindow::ProcMsgControl()
                 ui->chkRec->setChecked(false);
             }
 
+        }
+        else
+        {
+            frmView->m_StringView = QTextCodec::codecForMib(106)->toUnicode(datagram);
         }
 
         break;

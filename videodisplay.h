@@ -32,6 +32,7 @@ public:
     short int       m_Focus;
     int             m_Azi;
     int             m_Ele;
+    QString         m_StringView;
 
     QThread         *m_thread;
     VideoWork       *m_worker;
