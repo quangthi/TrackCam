@@ -44,7 +44,7 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
     m_Focus     = 0;
     m_Azi       = 0;
     m_Ele       = 0;
-    m_StringView =QString::fromUtf8("Màn hình bám đối tượng - Viện tích hợp hệ thống");
+    m_StringView =QString::fromUtf8("Màn hình bám đối tượng - Viện Tích hợp hệ thống");
 
     _drawTimer = new QTimer();
     connect(_drawTimer, SIGNAL(timeout()), this, SLOT(OnTimerDrawImage()));
