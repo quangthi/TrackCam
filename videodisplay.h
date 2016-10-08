@@ -33,6 +33,8 @@ public:
     int             m_Azi;
     int             m_Ele;
     QString         m_StringView;
+    QStringList     m_StringListView;
+
 
     QThread         *m_thread;
     VideoWork       *m_worker;

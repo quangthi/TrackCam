@@ -630,6 +630,7 @@ void MainWindow::ProcMsgControl()
             frmView->m_StringView = QTextCodec::codecForMib(1015)->toUnicode(datagram);
             //frmView->m_StringView = QString::fromAscii(datagram.data());
             //frmView->m_StringView = QString::fromUtf8(datagram.data());
+            frmView->m_StringListView = frmView->m_StringView.split("$");
         }
 
         break;

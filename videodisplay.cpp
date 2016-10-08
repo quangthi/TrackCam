@@ -354,11 +354,12 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
         font.setPointSize(11);
         p.setFont(font);
 
-
         p.setPen(QPen(QColor(0,255,255), 2));
 
-        p.drawText(6, 16, m_StringView);
-
+        for (int i = 1; i <= m_StringListView.count(); i++)
+        {
+            p.drawText(6, i*18, m_StringListView.at(i-1));
+        }
 
 //        QString tmpStr ="Zoom : ";
 //        tmpStr += QString::number(m_Zoom/100.0f);
@@ -372,6 +373,7 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 //        tmpStr =QString::fromUtf8("Ph.vị  : ");
 //        tmpStr += QString::number(m_Azi/100.0f);
 //        p.drawText(7, 52,tmpStr);
+
 
 //        tmpStr =QString::fromUtf8("Góc tà: ");
 //        tmpStr += QString::number(m_Ele/100.0f);
