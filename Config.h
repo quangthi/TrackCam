@@ -6,8 +6,8 @@
 #include <QTextStream>
 #include <string>
 #include <QRect>
-#include "Utility.h"
 #include <QtGui>
+#include "Utility.h"
 
 #define CFG_FILE            "C:\\Program Files\\NHCamera\\config.isc"
 #define VIDEO_PATH          "D://VideoRecord/"

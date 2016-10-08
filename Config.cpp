@@ -20,18 +20,18 @@ void CConfig::LoadXmlFile()
         return;
     }
 
-    _config.ipCam = cvReadIntByName(fs, 0, "IpCam", 0);
-    _config.strCamUrl_GV       = cvReadStringByName(fs, 0, "VsCamGV", CAM_URL_GV);
-    _config.strCamUrl_GV_ir    = cvReadStringByName(fs, 0, "IrCamGV", CAM_URL_GV_IR);
-    _config.strCamUrl_IP       = cvReadStringByName(fs, 0, "VsCamIP", CAM_URL_IP);
-    _config.strCamUrl_IP_ir    = cvReadStringByName(fs, 0, "IrCamIP", CAM_URL_IP_IR);
-    _config.trkWidth =  cvReadIntByName(fs, 0, "TrkWidth", TRK_WIDTH);
-    _config.trkHeight = cvReadIntByName(fs, 0, "TrkHeight", TRK_HEIGHT);
-    _config.frmPosX = cvReadIntByName(fs, 0, "FrmPosX", FRM_POS_X);
-    _config.frmPosY = cvReadIntByName(fs, 0, "FrmPosY", FRM_POS_Y);
-    _config.frmWidth = cvReadIntByName(fs, 0, "FrmWidth", FRM_WIDTH);
-    _config.frmHeight = cvReadIntByName(fs, 0, "FrmHeight", FRM_HEIGHT);
-    _config.fps = cvReadRealByName(fs, 0, "Fps", 18.5);
+    _config.ipCam               = cvReadIntByName(fs, 0, "IpCam", 0);
+    _config.strCamUrl_GV        = cvReadStringByName(fs, 0, "VsCamGV", CAM_URL_GV);
+    _config.strCamUrl_GV_ir     = cvReadStringByName(fs, 0, "IrCamGV", CAM_URL_GV_IR);
+    _config.strCamUrl_IP        = cvReadStringByName(fs, 0, "VsCamIP", CAM_URL_IP);
+    _config.strCamUrl_IP_ir     = cvReadStringByName(fs, 0, "IrCamIP", CAM_URL_IP_IR);
+    _config.trkWidth            = cvReadIntByName(fs, 0, "TrkWidth", QApplication::desktop()->screenGeometry(0).width()/12);
+    _config.trkHeight           = cvReadIntByName(fs, 0, "TrkHeight", QApplication::desktop()->screenGeometry(0).height()/12);
+    _config.frmPosX             = cvReadIntByName(fs, 0, "FrmPosX", QApplication::desktop()->screenGeometry(0).width()/2);
+    _config.frmPosY             = cvReadIntByName(fs, 0, "FrmPosY", QApplication::desktop()->screenGeometry(0).height()/2);
+    _config.frmWidth            = cvReadIntByName(fs, 0, "FrmWidth", QApplication::desktop()->screenGeometry(0).width()/2);
+    _config.frmHeight           = cvReadIntByName(fs, 0, "FrmHeight", QApplication::desktop()->screenGeometry(0).height()/2);
+    _config.fps                 = cvReadRealByName(fs, 0, "Fps", 18.5);
 
 
     cvReleaseFileStorage(&fs);
@@ -86,27 +86,25 @@ bool CConfig::LoadConfigFile()
 
 
 void CConfig::setDefault()
-{
-    QRect rec = QApplication::desktop()->screenGeometry(0);
-
-//    _config.frmWidth        = FRM_WIDTH;
-//    _config.frmHeight       = FRM_HEIGHT;
-//    _config.frmPosX         = FRM_POS_X;
-//    _config.frmPosY         = FRM_POS_Y;
-    _config.frmWidth        = rec.width()/2;
-    _config.frmHeight       = rec.height()/2;
-    _config.frmPosX         = rec.width()/2;
-    _config.frmPosY         = rec.height()/2;
+{    
+    //    _config.frmWidth        = FRM_WIDTH;
+    //    _config.frmHeight       = FRM_HEIGHT;
+    //    _config.frmPosX         = FRM_POS_X;
+    //    _config.frmPosY         = FRM_POS_Y;
+    _config.frmWidth        = QApplication::desktop()->screenGeometry(0).width()/2;
+    _config.frmHeight       = QApplication::desktop()->screenGeometry(0).height()/2;
+    _config.frmPosX         = QApplication::desktop()->screenGeometry(0).width()/2;
+    _config.frmPosY         = QApplication::desktop()->screenGeometry(0).height()/2;
 
 
-//    _config.trkWidth        = TRK_WIDTH;
-//    _config.trkHeight       = TRK_HEIGHT;
-    _config.trkWidth        = rec.width()/12;
-    _config.trkHeight       = rec.height()/12;
-    _config.strCamUrl_GV       = CAM_URL_GV;
-    _config.strCamUrl_GV_ir    = CAM_URL_GV_IR;
-    _config.strCamUrl_IP       = CAM_URL_IP;
-    _config.strCamUrl_IP_ir    = CAM_URL_IP_IR;
+    //    _config.trkWidth        = TRK_WIDTH;
+    //    _config.trkHeight       = TRK_HEIGHT;
+    _config.trkWidth        = QApplication::desktop()->screenGeometry(0).width()/12;
+    _config.trkHeight       = QApplication::desktop()->screenGeometry(0).height()/12;
+    _config.strCamUrl_GV    = CAM_URL_GV;
+    _config.strCamUrl_GV_ir = CAM_URL_GV_IR;
+    _config.strCamUrl_IP    = CAM_URL_IP;
+    _config.strCamUrl_IP_ir = CAM_URL_IP_IR;
     _config.fps             = FPS;
     _config.ipCam           = 1;
 

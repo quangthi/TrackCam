@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->EditHeight->setValidator( new QIntValidator(30, m_Config._config.frmHeight*0.8f, this));
     this->ui->FpsEdit->setValidator( new QDoubleValidator(15.0, 30.0, 1, this));
 
+    this->move(0, 0);
+
     InitNetwork();
 
     SendMsgTrkPos(0, 0);
