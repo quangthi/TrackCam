@@ -12,7 +12,18 @@ void CConfig::LoadXmlFile()
     if (!QDir(CONF_PATH).exists())
         QDir().mkdir(CONF_PATH);
 
-    CvFileStorage* fs = cvOpenFileStorage(XML_FILE, 0, CV_STORAGE_READ);
+    CvFileStorage* fs = NULL;
+
+    try
+    {
+        fs = cvOpenFileStorage(XML_FILE, 0, CV_STORAGE_READ);
+    }
+    catch (...)
+    {
+        setDefault();
+        return;
+    }
+
 
     if (fs == NULL)
     {
@@ -106,7 +117,7 @@ void CConfig::setDefault()
     _config.strCamUrl_IP    = CAM_URL_IP;
     _config.strCamUrl_IP_ir = CAM_URL_IP_IR;
     _config.fps             = FPS;
-    _config.ipCam           = 1;
+    _config.ipCam           = 3;
 
     SaveXmlFile();
     //SaveToFile();
