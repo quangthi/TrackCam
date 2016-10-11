@@ -56,7 +56,21 @@ MainWindow::MainWindow(QWidget *parent) :
     gVideoSize = cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
 
     frmView = new VideoDisplay();
-    frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    //frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    if ((m_Config._config.frmWidth == QApplication::desktop()->screenGeometry(0).width()) &&
+            (m_Config._config.frmHeight == QApplication::desktop()->screenGeometry(0).height()))
+        frmView->showFullScreen();
+    else
+    {
+        frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+        frmView->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
+        frmView->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+        frmView->show();
+    }
+
+    frmView->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
+    frmView->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+
     frmView->show();
     gIsVideoShown = true;
 

@@ -28,8 +28,8 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
 
 {
     ui->setupUi(this);
-    this->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
-    this->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+//    this->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
+//    this->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
 
     m_Writer = NULL;
 
