@@ -28,9 +28,11 @@ VideoDisplay::VideoDisplay(QWidget *parent) :
 
 {
     ui->setupUi(this);
-//    this->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
-//    this->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
-
+    //this->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
+    //this->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+    //this->showFullScreen();
+    //this->showMaximized();
+    this->setCursor(Qt::CrossCursor);
     m_Writer = NULL;
 
 
@@ -356,34 +358,33 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
 
         p.setPen(QPen(QColor(0,255,255), 2));
 
-        for (int i = 1; i <= m_StringListView.count(); i++)
-        {
-            p.drawText(6, i*18, m_StringListView.at(i-1));
-        }
+//        for (int i = 1; i <= m_StringListView.count(); i++)
+//        {
+//            p.drawText(6, i*18, m_StringListView.at(i-1));
+//        }
 
-//        QString tmpStr ="Zoom : ";
-//        tmpStr += QString::number(m_Zoom/100.0f);
-//        tmpStr += "x";
-//        p.drawText(6, 16,tmpStr);
+        QString tmpStr ="Zoom : ";
+        tmpStr += QString::number(m_Zoom/100.0f);
+        tmpStr += "x";
+        p.drawText(6, 16,tmpStr);
 
-//        tmpStr ="Focus : ";
-//        tmpStr += QString::number(m_Focus);
-//        p.drawText(5, 34,tmpStr);
+        tmpStr ="Focus : ";
+        tmpStr += QString::number(m_Focus);
+        p.drawText(5, 34,tmpStr);
 
-//        tmpStr =QString::fromUtf8("Ph.vị  : ");
-//        tmpStr += QString::number(m_Azi/100.0f);
-//        p.drawText(7, 52,tmpStr);
+        tmpStr =QString::fromUtf8("Ph.vị  : ");
+        tmpStr += QString::number(m_Azi/100.0f);
+        p.drawText(7, 52,tmpStr);
 
 
-//        tmpStr =QString::fromUtf8("Góc tà: ");
-//        tmpStr += QString::number(m_Ele/100.0f);
-//        p.drawText(5, 70,tmpStr);
-
+        tmpStr =QString::fromUtf8("Góc tà: ");
+        tmpStr += QString::number(m_Ele/100.0f);
+        p.drawText(5, 70,tmpStr);
 
         if (m_Writer)
         {
             p.setPen(QPen(Qt::red, 2));
-            p.drawText(m_Config._config.frmWidth - 85, m_Config._config.frmHeight - 10, "Recording...");
+            p.drawText(m_Config._config.frmWidth - 85, 18, "Recording...");
         }
     }
 
@@ -447,7 +448,7 @@ void VideoDisplay::paintEvent(QPaintEvent *event)
             m_rectCurrent.left = (int)(0.3f*m_worker->m_rectCurrent.left + 0.7f*m_rectCurrent.left);
             m_rectCurrent.right = (int)(0.3f*m_worker->m_rectCurrent.right + 0.7f*m_rectCurrent.right);
         }
-        p.setPen(QPen(QColor(0,255,255), 1));
+        p.setPen(QPen(QColor(0,255,0), 2));
 
         QPoint lefttop[3] = {
             QPoint(m_rectCurrent.left, m_rectCurrent.top + 10),
@@ -509,6 +510,28 @@ void VideoDisplay::mousePressEvent(QMouseEvent *event)
             _toBeTracked.setBottom( event->y());
         }
     }
+    else if (event->buttons() & Qt::RightButton)
+    {
+        trackingRect.left		= event->x()-m_rectWidthInit / 2;
+        trackingRect.top		= event->y()-m_rectHeightInit / 2;
+        trackingRect.right		= event->x()+m_rectWidthInit / 2;
+        trackingRect.bottom	= event->y()+m_rectHeightInit / 2;
+
+        if(trackingRect.left < 0)
+            trackingRect.left = 0;
+        if(trackingRect.right > m_Config._config.frmWidth - 1)
+            trackingRect.right = m_Config._config.frmWidth - 1;
+        if(trackingRect.top < 0)
+            trackingRect.top = 0;
+        if(trackingRect.bottom > m_Config._config.frmHeight - 1)
+            trackingRect.bottom = m_Config._config.frmHeight - 1;
+
+        ResetRectCurrent();
+        m_worker->StartTracking(trackingRect);
+    }
+
+
+
     QMainWindow::mousePressEvent(event);
 }
 

@@ -12,16 +12,16 @@
 #include "opencv2/core/core.hpp"
 #include <DIRECT.H>
 
-#define FRM_WIDTH       640
-#define FRM_HEIGHT      512
-#define FRM_POS_X       640
-#define FRM_POS_Y       512
-#define CAM_URL_GV         "rtsp://127.0.0.1:8554/cam1_stream1"
-#define CAM_URL_GV_IR      "rtsp://127.0.0.1:8554/cam2_stream1"
-#define CAM_URL_IP         "udp://@192.168.150.182:15004"
-#define CAM_URL_IP_IR      "udp://@192.168.150.182:15006"
-#define TRK_WIDTH       90
-#define TRK_HEIGHT      72
+//#define FRM_WIDTH       640
+//#define FRM_HEIGHT      512
+//#define FRM_POS_X       640
+//#define FRM_POS_Y       512
+#define CAM_URL_GV      "rtsp://127.0.0.1:8554/cam1_stream1"
+#define CAM_URL_GV_IR   "rtsp://127.0.0.1:8554/cam2_stream1"
+#define CAM_URL_IP      "udp://@192.168.150.182:15006"
+#define CAM_URL_IP_IR   "udp://@192.168.150.182:15004"
+//#define TRK_WIDTH       90
+//#define TRK_HEIGHT      72
 #define FPS             18.5
 #define LOCAL_UDP_PORT  8000
 #define REMOTE_UDP_PORT 8001

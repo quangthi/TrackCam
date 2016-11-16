@@ -53,25 +53,29 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(gSendTimer, SIGNAL(timeout()), this, SLOT(OnTimerSend()));
     gSendTimer->start(100);
 
+    QApplication::desktop()->screenGeometry(0).width();
+    QApplication::desktop()->screenGeometry(0).height();
+
     gVideoSize = cvSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
 
     frmView = new VideoDisplay();
-    //frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    if ((m_Config._config.frmWidth == QApplication::desktop()->screenGeometry(0).width()) &&
-            (m_Config._config.frmHeight == QApplication::desktop()->screenGeometry(0).height()))
-        frmView->showFullScreen();
-    else
-    {
-        frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        frmView->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
-        frmView->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
-        frmView->show();
-    }
-
+   // Thiet lap khung hien thi video cho nha dan DK
+    frmView->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     frmView->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
     frmView->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
-
     frmView->show();
+
+    // Thiet lap khung hien thi video cho nha Tau kiem ngu
+//    if ((m_Config._config.frmWidth == QApplication::desktop()->screenGeometry(0).width()) &&
+//            (m_Config._config.frmHeight == QApplication::desktop()->screenGeometry(0).height()))
+//        frmView->showFullScreen();
+//    else
+//    {
+//        frmView->move(m_Config._config.frmPosX, m_Config._config.frmPosY);
+//        frmView->setFixedSize(m_Config._config.frmWidth, m_Config._config.frmHeight);
+//        frmView->show();
+//    }
+
     gIsVideoShown = true;
 
     gStrVideoFile = "";
@@ -301,13 +305,13 @@ void MainWindow::on_cbtnIncrease_clicked()
         return;
     if (frmView->m_worker->m_IsTracking)
         return;
-    if (frmView->m_rectWidthInit >= m_Config._config.frmWidth*0.8f)
+    if (frmView->m_rectWidthInit > 90)
         return;
-    if (frmView->m_rectHeightInit >= m_Config._config.frmWidth*0.8f)
+    if (frmView->m_rectHeightInit > 60)
         return;    
 
-    frmView->m_rectWidthInit = frmView->m_rectWidthInit*1.1f;
-    frmView->m_rectHeightInit = frmView->m_rectHeightInit*1.1f;
+    frmView->m_rectWidthInit = frmView->m_rectWidthInit+9;
+    frmView->m_rectHeightInit = frmView->m_rectHeightInit+6;
 
     this->ui->EditWidth->setText(QString::number(frmView->m_rectWidthInit));
     this->ui->EditHeight->setText(QString::number(frmView->m_rectHeightInit));
@@ -326,10 +330,10 @@ void MainWindow::on_cbtnDecrease_clicked()
         return;
     if (frmView->m_rectWidthInit <= 30)
         return;
-    if (frmView->m_rectHeightInit <= 30)
+    if (frmView->m_rectHeightInit <= 20)
         return;
-    frmView->m_rectWidthInit = frmView->m_rectWidthInit / 1.1f + 1;
-    frmView->m_rectHeightInit = frmView->m_rectHeightInit / 1.1f + 1;
+    frmView->m_rectWidthInit = frmView->m_rectWidthInit -9;
+    frmView->m_rectHeightInit = frmView->m_rectHeightInit -6;
 
     this->ui->EditWidth->setText(QString::number(frmView->m_rectWidthInit));
     this->ui->EditHeight->setText(QString::number(frmView->m_rectHeightInit));

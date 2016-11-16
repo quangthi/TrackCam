@@ -143,7 +143,6 @@ void VideoWork::doWork()
 //            int _width = _gTrueFrame->width;
 //            int _height = _gTrueFrame->height;
 
-
 //            qDebug() << "width:" << QString::number(_width);
 //            qDebug() << "height:" << QString::number(_height);
 //        }

@@ -36,12 +36,12 @@ void CConfig::LoadXmlFile()
     _config.strCamUrl_GV_ir     = cvReadStringByName(fs, 0, "IrCamGV", CAM_URL_GV_IR);
     _config.strCamUrl_IP        = cvReadStringByName(fs, 0, "VsCamIP", CAM_URL_IP);
     _config.strCamUrl_IP_ir     = cvReadStringByName(fs, 0, "IrCamIP", CAM_URL_IP_IR);
-    _config.trkWidth            = cvReadIntByName(fs, 0, "TrkWidth", QApplication::desktop()->screenGeometry(0).width()/12);
-    _config.trkHeight           = cvReadIntByName(fs, 0, "TrkHeight", QApplication::desktop()->screenGeometry(0).height()/12);
-    _config.frmPosX             = cvReadIntByName(fs, 0, "FrmPosX", QApplication::desktop()->screenGeometry(0).width()/2);
-    _config.frmPosY             = cvReadIntByName(fs, 0, "FrmPosY", QApplication::desktop()->screenGeometry(0).height()/2);
-    _config.frmWidth            = cvReadIntByName(fs, 0, "FrmWidth", QApplication::desktop()->screenGeometry(0).width()/2);
-    _config.frmHeight           = cvReadIntByName(fs, 0, "FrmHeight", QApplication::desktop()->screenGeometry(0).height()/2);
+    _config.trkWidth            = cvReadIntByName(fs, 0, "TrkWidth", QApplication::desktop()->screenGeometry(0).width()/6);
+    _config.trkHeight           = cvReadIntByName(fs, 0, "TrkHeight", QApplication::desktop()->screenGeometry(0).height()/6);
+    _config.frmPosX             = cvReadIntByName(fs, 0, "FrmPosX", 0);
+    _config.frmPosY             = cvReadIntByName(fs, 0, "FrmPosY", 0);
+    _config.frmWidth            = cvReadIntByName(fs, 0, "FrmWidth", QApplication::desktop()->screenGeometry(0).width());
+    _config.frmHeight           = cvReadIntByName(fs, 0, "FrmHeight", QApplication::desktop()->screenGeometry(0).height());
     _config.fps                 = cvReadRealByName(fs, 0, "Fps", 18.5);
 
 
@@ -98,29 +98,28 @@ bool CConfig::LoadConfigFile()
 
 void CConfig::setDefault()
 {    
-    //    _config.frmWidth        = FRM_WIDTH;
-    //    _config.frmHeight       = FRM_HEIGHT;
-    //    _config.frmPosX         = FRM_POS_X;
-    //    _config.frmPosY         = FRM_POS_Y;
+
+    // Opt1: non-FullScreen
     _config.frmWidth        = QApplication::desktop()->screenGeometry(0).width()/2;
     _config.frmHeight       = QApplication::desktop()->screenGeometry(0).height()/2;
     _config.frmPosX         = QApplication::desktop()->screenGeometry(0).width()/2;
     _config.frmPosY         = QApplication::desktop()->screenGeometry(0).height()/2;
+    //Opt2: FullScreen
+//    _config.frmWidth        = QApplication::desktop()->screenGeometry(0).width();
+//    _config.frmHeight       = QApplication::desktop()->screenGeometry(0).height();
+//    _config.frmPosX         = 0;
+//    _config.frmPosY         = 0;
 
-
-    //    _config.trkWidth        = TRK_WIDTH;
-    //    _config.trkHeight       = TRK_HEIGHT;
-    _config.trkWidth        = QApplication::desktop()->screenGeometry(0).width()/12;
-    _config.trkHeight       = QApplication::desktop()->screenGeometry(0).height()/12;
+    _config.trkWidth        = _config.frmWidth/6;
+    _config.trkHeight       = _config.frmHeight/6;
     _config.strCamUrl_GV    = CAM_URL_GV;
     _config.strCamUrl_GV_ir = CAM_URL_GV_IR;
     _config.strCamUrl_IP    = CAM_URL_IP;
     _config.strCamUrl_IP_ir = CAM_URL_IP_IR;
     _config.fps             = FPS;
-    _config.ipCam           = 3;
+    _config.ipCam           = 1;
 
-    SaveXmlFile();
-    //SaveToFile();
+    SaveXmlFile();    
 }
 
 void CConfig::SaveToFile()
